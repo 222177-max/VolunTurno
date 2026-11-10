@@ -1,0 +1,271 @@
+
+---
+interface Props {
+  texto?: string;
+  id?: string;
+  tipo?: 'button' | 'submit';
+}
+
+const {
+  texto = 'Confirmar acción',
+  id = 'boton-multimodal',
+  tipo = 'button'
+} = Astro.props;
+---
+
+<div class="multimodal-contenedor" data-multimodal>
+  <div class="multimodal-preferencias">
+    <label class="multimodal-opcion">
+      <input type="checkbox" data-sonido checked />
+      Activar sonido
+    </label>
+
+    <label class="multimodal-opcion">
+      <input type="checkbox" data-vibracion checked />
+      Activar vibración
+    </label>
+  </div>
+
+  <button
+  id={id}
+  type={tipo}
+  class="multimodal-boton"
+  data-boton
+  data-demo={tipo === 'button' && id === 'prueba-confirmacion' ? 'true' : 'false'}
+  data-texto={texto}
+>
+    <span data-icono aria-hidden="true">✓</span>
+    <span data-etiqueta>{texto}</span>
+  </button>
+
+  <p
+    class="multimodal-mensaje"
+    data-mensaje
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  ></p>
+</div>
+
+<style>
+  .multimodal-contenedor {
+    display: grid;
+    gap: 12px;
+  }
+
+  .multimodal-preferencias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .multimodal-opcion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .multimodal-opcion input {
+    width: 16px;
+    height: 16px;
+    accent-color: #047857;
+  }
+
+  .multimodal-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    background: #047857;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      transform 120ms ease,
+      background-color 120ms ease;
+  }
+
+  .multimodal-boton:hover {
+    background: #065f46;
+  }
+
+  .multimodal-boton:active {
+    transform: scale(0.97);
+  }
+
+  .multimodal-boton:focus-visible {
+    outline: 3px solid #10b981;
+    outline-offset: 3px;
+  }
+
+  .multimodal-boton:disabled {
+    cursor: wait;
+    opacity: 0.75;
+  }
+
+  .multimodal-boton.exito {
+    background: #065f46;
+  }
+
+  .multimodal-mensaje {
+    min-height: 20px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .multimodal-boton {
+      transition: none;
+    }
+
+    .multimodal-boton:active {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // Cada componente controla sus propios elementos.
+  const componentes = document.querySelectorAll<HTMLElement>(
+    '[data-multimodal]'
+  );
+
+  // Contexto de audio: se crea únicamente cuando el usuario
+  // interactúa, respetando las restricciones del navegador.
+  let contextoAudio: AudioContext | null = null;
+
+  async function reproducirSonido() {
+    const AudioContextDisponible = window.AudioContext;
+
+    if (!AudioContextDisponible) return;
+
+    try {
+      contextoAudio ??= new AudioContextDisponible();
+
+      if (contextoAudio.state === 'suspended') {
+        await contextoAudio.resume();
+      }
+
+      const inicio = contextoAudio.currentTime;
+
+      // Dos tonos breves de confirmación.
+      const tonos = [
+        { frecuencia: 660, tiempo: 0 },
+        { frecuencia: 880, tiempo: 0.13 }
+      ];
+
+      for (const tono of tonos) {
+        const oscilador = contextoAudio.createOscillator();
+        const volumen = contextoAudio.createGain();
+
+        oscilador.type = 'sine';
+        oscilador.frequency.value = tono.frecuencia;
+
+        const comienza = inicio + tono.tiempo;
+        const termina = comienza + 0.12;
+
+        volumen.gain.setValueAtTime(0.0001, comienza);
+        volumen.gain.exponentialRampToValueAtTime(
+          0.08,
+          comienza + 0.015
+        );
+        volumen.gain.exponentialRampToValueAtTime(
+          0.0001,
+          termina
+        );
+
+        oscilador.connect(volumen);
+        volumen.connect(contextoAudio.destination);
+
+        oscilador.start(comienza);
+        oscilador.stop(termina);
+      }
+    } catch (error) {
+      console.warn('Audio no disponible:', error);
+    }
+  }
+
+  function vibrar() {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([70, 40, 70]);
+    }
+  }
+
+  for (const componente of componentes) {
+    const boton = componente.querySelector<HTMLButtonElement>(
+      '[data-boton]'
+    );
+
+    const etiqueta = componente.querySelector<HTMLElement>(
+      '[data-etiqueta]'
+    );
+
+    const mensaje = componente.querySelector<HTMLElement>(
+      '[data-mensaje]'
+    );
+
+    const sonido = componente.querySelector<HTMLInputElement>(
+      '[data-sonido]'
+    );
+
+    const vibracion = componente.querySelector<HTMLInputElement>(
+      '[data-vibracion]'
+    );
+
+    if (!boton || !etiqueta || !mensaje) continue;
+
+    // Exponer una función de confirmación para que otros
+    // módulos puedan utilizarla después de guardar en MySQL.
+    const confirmarExito = () => {
+      boton.classList.add('exito');
+      etiqueta.textContent = 'Acción confirmada ✓';
+      mensaje.textContent = 'La acción se completó correctamente.';
+
+      if (sonido?.checked) {
+        void reproducirSonido();
+      }
+
+      if (vibracion?.checked) {
+        vibrar();
+      }
+
+      componente.dispatchEvent(
+        new CustomEvent('multimodal:confirmado', {
+          bubbles: true
+        })
+      );
+    };
+
+    // DEMOSTRACIÓN INDEPENDIENTE
+    // En el botón real de Publicar turno no utilizaremos
+    // confirmación automática: esperaremos la respuesta MySQL.
+    // Solo confirmar automáticamente en la página de demostración.
+// En Crear turno, esperar a que MySQL guarde correctamente.
+if (
+  boton.type === 'button' &&
+  boton.dataset.demo === 'true'
+) {
+  boton.addEventListener('click', confirmarExito);
+}
+
+    // Permitir confirmar desde el código de Crear turno.
+    componente.addEventListener('multimodal:exito', confirmarExito);
+
+    // Restaurar el estado inicial.
+    componente.addEventListener('multimodal:reiniciar', () => {
+      boton.classList.remove('exito');
+      etiqueta.textContent =
+        boton.dataset.texto || 'Confirmar acción';
+      mensaje.textContent = '';
+    });
+  }
+</script>

@@ -1,0 +1,21 @@
+# Credenciales
+.env
+.env.*
+!.env.example
+
+# Dependencias
+node_modules/
+
+# Astro
+.astro/
+dist/
+
+# Archivos temporales
+*.log
+*.bak
+.DS_Store
+Thumbs.db
+
+# Entornos y editores
+.venv/
+.idea/

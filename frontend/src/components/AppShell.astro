@@ -1,0 +1,276 @@
+
+---
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  pagina: 'dashboard' | 'calendario' | 'crear-turno';
+}
+
+const { titulo, descripcion = '', pagina } = Astro.props;
+
+const menu = [
+  { nombre: 'Panel principal', ruta: '/dashboard', icono: '▦', id: 'dashboard' },
+  { nombre: 'Calendario', ruta: '/calendario', icono: '▣', id: 'calendario' },
+  { nombre: 'Crear turno', ruta: '/crear-turno', icono: '+', id: 'crear-turno' },
+  { nombre: 'Personal', ruta: '#', icono: '♙', id: 'personal' },
+  { nombre: 'Equipos', ruta: '#', icono: '◇', id: 'equipos' },
+  { nombre: 'Asistencia', ruta: '#', icono: '✓', id: 'asistencia' },
+  { nombre: 'Organización', ruta: '#', icono: '⚙', id: 'organizacion' }
+];
+---
+
+<div class="min-h-dvh bg-slate-100 text-slate-900 transition-colors
+            dark:bg-slate-950 dark:text-slate-100">
+
+  <div class="mx-auto flex min-h-dvh max-w-[1600px] gap-4 p-3 md:p-4">
+
+    <!-- MENÚ LATERAL -->
+    <aside
+      class="hidden w-56 shrink-0 flex-col rounded-xl
+             bg-[#103D32] p-4 text-white md:flex"
+      aria-label="Navegación principal"
+    >
+      <a href="/dashboard" class="mb-1 text-base font-bold">
+        🌱 VolunTurno
+      </a>
+
+      <p class="mb-7 text-xs text-emerald-100">
+        Rescate Verde
+      </p>
+
+      <nav aria-label="Módulos de VolunTurno" class="flex-1">
+        <ul class="space-y-1">
+          {menu.map((item) => (
+            <li>
+              <a
+                href={item.ruta}
+                aria-current={item.id === pagina ? 'page' : undefined}
+                aria-disabled={item.ruta === '#' ? 'true' : undefined}
+                class:list={[
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm',
+                  'transition-colors focus-visible:outline-2',
+                  'focus-visible:outline-offset-2 focus-visible:outline-white',
+                  item.id === pagina
+                    ? 'bg-emerald-700 font-semibold text-white'
+                    : 'text-emerald-50 hover:bg-white/10',
+                  item.ruta === '#' && 'cursor-not-allowed opacity-60'
+                ]}
+              >
+                <span aria-hidden="true" class="w-5 text-center">
+                  {item.icono}
+                </span>
+                {item.nombre}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <button
+        id="cerrar-sesion"
+        type="button"
+        class="mt-6 rounded-lg border border-white/20
+               px-3 py-2.5 text-sm hover:bg-white/10"
+      >
+        Cerrar sesión
+      </button>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="min-w-0 flex-1">
+
+      <!-- ENCABEZADO -->
+      <header
+        class="mb-4 flex flex-wrap items-center justify-between gap-3
+               rounded-xl bg-white px-5 py-4 shadow-sm
+               dark:bg-slate-900"
+      >
+        <div>
+          <p class="text-sm font-semibold">
+            Organización: Rescate Verde
+          </p>
+          <p id="nombre-usuario" class="mt-1 text-xs text-slate-500
+                                      dark:text-slate-400">
+            Verificando usuario...
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- CAMBIO DE TEMA -->
+          <button
+            id="cambiar-tema"
+            type="button"
+            aria-label="Cambiar modo claro u oscuro"
+            aria-pressed="false"
+            class="rounded-lg border border-slate-200
+                   px-3 py-2 text-sm
+                   hover:bg-slate-100
+                   focus-visible:outline-2
+                   focus-visible:outline-emerald-600
+                   dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            <span id="icono-tema" aria-hidden="true">☾</span>
+            <span id="texto-tema" class="ml-1">Oscuro</span>
+          </button>
+
+          <div
+            class="flex h-9 w-9 items-center justify-center
+                   rounded-full bg-emerald-900 text-sm
+                   font-bold text-white"
+            aria-hidden="true"
+          >
+            <span id="inicial-usuario">U</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- NAVEGACIÓN PARA MÓVILES -->
+      <nav
+        class="mb-4 flex gap-2 overflow-x-auto rounded-xl
+               bg-white p-2 md:hidden dark:bg-slate-900"
+        aria-label="Navegación móvil"
+      >
+        {menu.filter(item => item.ruta !== '#').map(item => (
+          <a
+            href={item.ruta}
+            aria-current={item.id === pagina ? 'page' : undefined}
+            class:list={[
+              'shrink-0 rounded-lg px-3 py-2 text-sm',
+              item.id === pagina
+                ? 'bg-emerald-700 text-white'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+            ]}
+          >
+            {item.nombre}
+          </a>
+        ))}
+        <button
+          id="cerrar-sesion-movil"
+          type="button"
+          class="shrink-0 rounded-lg px-3 py-2 text-sm
+                 text-red-700 dark:text-red-300"
+        >
+          Salir
+        </button>
+      </nav>
+
+      <!-- TÍTULO -->
+      <div class="mb-5">
+        <h1 class="text-2xl font-bold tracking-tight">
+          {titulo}
+        </h1>
+        {descripcion && (
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            {descripcion}
+          </p>
+        )}
+      </div>
+
+      <!-- CONTENIDO DE CADA PÁGINA -->
+      <main id="contenido-principal" tabindex="-1">
+        <slot />
+      </main>
+
+      <footer class="py-6 text-xs text-slate-500 dark:text-slate-400">
+        VolunTurno · Sistema de gestión de turnos y voluntarios
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script>
+  // TEMA CLARO / OSCURO
+  const botonTema = document.querySelector<HTMLButtonElement>('#cambiar-tema');
+  const iconoTema = document.querySelector<HTMLElement>('#icono-tema');
+  const textoTema = document.querySelector<HTMLElement>('#texto-tema');
+
+  function aplicarTema(oscuro: boolean) {
+    document.documentElement.classList.toggle('dark', oscuro);
+
+    if (iconoTema) iconoTema.textContent = oscuro ? '☀' : '☾';
+    if (textoTema) textoTema.textContent = oscuro ? 'Claro' : 'Oscuro';
+
+    botonTema?.setAttribute('aria-pressed', String(oscuro));
+    localStorage.setItem('volunturno-tema', oscuro ? 'dark' : 'light');
+  }
+
+  aplicarTema(
+    localStorage.getItem('volunturno-tema') === 'dark' ||
+    (
+      !localStorage.getItem('volunturno-tema') &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    )
+  );
+
+  botonTema?.addEventListener('click', () => {
+    aplicarTema(!document.documentElement.classList.contains('dark'));
+  });
+
+  // VERIFICAR SESIÓN Y ROL
+  async function comprobarUsuario() {
+    try {
+      const respuesta = await fetch('http://localhost:3006/api/auth/me', {
+        credentials: 'include'
+      });
+
+      if (!respuesta.ok) {
+        window.location.replace('/login');
+        return;
+      }
+
+      const datos = await respuesta.json();
+      const usuario = datos.usuario;
+
+      if (usuario.requiereCambio || usuario.requiere_cambio_password) {
+        window.location.replace('/cambiar-password');
+        return;
+      }
+
+      if (usuario.rol !== 'coordinador') {
+        window.location.replace('/portal');
+        return;
+      }
+
+      const nombre = document.querySelector<HTMLElement>('#nombre-usuario');
+      const inicial = document.querySelector<HTMLElement>('#inicial-usuario');
+
+      if (nombre) {
+        nombre.textContent = `${usuario.nombre} ${usuario.apellido} · Coordinador`;
+      }
+
+      if (inicial) {
+        inicial.textContent = usuario.nombre?.charAt(0).toUpperCase() || 'C';
+      }
+
+      document.dispatchEvent(new CustomEvent('volunturno:autorizado'));
+
+    } catch {
+      const nombre = document.querySelector<HTMLElement>('#nombre-usuario');
+      if (nombre) nombre.textContent = 'Error de conexión con el backend';
+    }
+  }
+
+  comprobarUsuario();
+
+  // CERRAR SESIÓN
+  async function cerrarSesion() {
+    try {
+      const respuesta = await fetch(
+        'http://localhost:3006/api/auth/logout',
+        { method: 'POST', credentials: 'include' }
+      );
+
+      if (!respuesta.ok) throw new Error('No se pudo cerrar la sesión');
+
+      window.location.replace('/login');
+    } catch {
+      alert('No se pudo cerrar la sesión. Intenta nuevamente.');
+    }
+  }
+
+  document.querySelector('#cerrar-sesion')
+    ?.addEventListener('click', cerrarSesion);
+
+  document.querySelector('#cerrar-sesion-movil')
+    ?.addEventListener('click', cerrarSesion);
+</script>

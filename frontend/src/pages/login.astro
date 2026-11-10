@@ -1,0 +1,443 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <main class="grid min-h-dvh lg:grid-cols-2">
+
+    <!-- ========================================= -->
+    <!-- PANEL IZQUIERDO: PRESENTACIÓN DE VOLUNTURNO -->
+    <!-- ========================================= -->
+    <section
+      class="hidden flex-col justify-between
+             bg-emerald-800 p-8 text-white lg:flex"
+    >
+
+      <!-- LOGOTIPO -->
+      <div class="flex items-center gap-3">
+        <div
+          class="flex h-11 w-11 items-center justify-center
+                 rounded-xl bg-white/15 text-2xl"
+        >
+          🌱
+        </div>
+
+        <span class="text-xl font-bold">
+          VolunTurno
+        </span>
+      </div>
+
+      <!-- PRESENTACIÓN -->
+      <div class="my-6">
+
+        <span
+          class="inline-block rounded-full border border-white/20
+                 px-4 py-2 text-xs"
+        >
+          Gestión inteligente de voluntarios
+        </span>
+
+        <h1
+          class="mt-5 max-w-xl text-3xl font-bold
+                 leading-tight xl:text-4xl"
+        >
+          Organiza equipos.
+          Gestiona turnos.
+          Genera impacto.
+        </h1>
+
+        <p
+          class="mt-4 max-w-md text-sm
+                 leading-relaxed text-emerald-100"
+        >
+          Una plataforma para coordinar voluntarios,
+          personal y actividades de manera sencilla.
+        </p>
+
+      </div>
+
+      <!-- PIE DEL PANEL -->
+      <p class="text-xs text-emerald-200">
+        © 2026 VolunTurno
+      </p>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- PANEL DERECHO: FORMULARIO DE INICIO DE SESIÓN -->
+    <!-- ========================================= -->
+    <section
+      class="flex items-center justify-center
+             bg-slate-50 px-6 py-6"
+    >
+
+      <div class="w-full max-w-md">
+
+        <!-- TÍTULO -->
+        <div class="mb-5 text-center lg:text-left">
+
+          <!-- LOGOTIPO PARA PANTALLAS PEQUEÑAS -->
+          <div
+            class="mb-4 text-2xl font-bold
+                   text-emerald-800 lg:hidden"
+          >
+            🌱 VolunTurno
+          </div>
+
+          <h2
+            class="text-2xl font-bold text-slate-900
+                   xl:text-3xl"
+          >
+            Bienvenido de nuevo
+          </h2>
+
+          <p class="mt-2 text-sm text-slate-500">
+            Ingresa tus credenciales para acceder al sistema.
+          </p>
+
+        </div>
+
+        <!-- TARJETA DEL LOGIN -->
+        <div
+          class="rounded-xl border border-slate-200
+                 bg-white p-6 shadow-sm"
+        >
+
+          <form id="login-form" class="space-y-4">
+
+            <!-- CAMPO: CORREO ELECTRÓNICO -->
+            <div>
+
+              <label
+                for="email"
+                class="mb-2 block text-sm font-medium
+                       text-slate-900"
+              >
+                Correo electrónico
+              </label>
+
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="username"
+                required
+                placeholder="correo@ejemplo.com"
+                class="w-full rounded-md border border-slate-300
+                       px-4 py-2.5 text-sm
+                       outline-none transition
+                       focus:border-emerald-600
+                       focus:ring-2 focus:ring-emerald-100"
+              />
+
+            </div>
+
+            <!-- CAMPO: CONTRASEÑA -->
+            <div>
+
+              <label
+                for="password"
+                class="mb-2 block text-sm font-medium
+                       text-slate-900"
+              >
+                Contraseña
+              </label>
+
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                placeholder="Ingresa tu contraseña"
+                class="w-full rounded-md border border-slate-300
+                       px-4 py-2.5 text-sm
+                       outline-none transition
+                       focus:border-emerald-600
+                       focus:ring-2 focus:ring-emerald-100"
+              />
+
+            </div>
+
+            <!-- OPCIÓN: MOSTRAR CONTRASEÑA -->
+            <label
+              class="flex cursor-pointer items-center gap-2
+                     text-sm text-slate-600"
+            >
+
+              <input
+                id="mostrar-password"
+                type="checkbox"
+                class="accent-emerald-700"
+              />
+
+              Mostrar contraseña
+
+            </label>
+
+            <!-- MENSAJES DE ERROR Y CONFIRMACIÓN -->
+            <p
+              id="mensaje"
+              class="hidden rounded-md p-3 text-sm"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+            <!-- BOTÓN: INICIAR SESIÓN -->
+            <button
+              id="login-button"
+              type="submit"
+              class="w-full rounded-md bg-emerald-700
+                     px-5 py-2.5 text-sm font-semibold
+                     text-white transition-all duration-150
+                     hover:bg-emerald-600
+                     active:scale-[0.98]
+                     active:bg-emerald-900
+                     focus-visible:outline-2
+                     focus-visible:outline-offset-2
+                     focus-visible:outline-emerald-600
+                     disabled:cursor-wait
+                     disabled:opacity-70"
+            >
+              Iniciar sesión
+            </button>
+
+          </form>
+
+        </div>
+
+        <!-- PIE DEL FORMULARIO -->
+        <p class="mt-4 text-center text-xs text-slate-500">
+          Plataforma de gestión de turnos y voluntarios
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+</Layout>
+
+<!-- ========================================= -->
+<!-- JAVASCRIPT: FUNCIONAMIENTO DEL LOGIN -->
+<!-- ========================================= -->
+<script>
+
+  // 1. OBTENER LOS ELEMENTOS DEL FORMULARIO
+
+  // Buscar el formulario de inicio de sesión.
+  const form = document.querySelector<HTMLFormElement>(
+    '#login-form'
+  );
+
+  // Buscar el botón de iniciar sesión.
+  const boton = document.querySelector<HTMLButtonElement>(
+    '#login-button'
+  );
+
+  // Buscar el elemento donde se mostrarán mensajes.
+  const mensaje = document.querySelector<HTMLParagraphElement>(
+    '#mensaje'
+  );
+
+  // Buscar el campo de contraseña.
+  const password = document.querySelector<HTMLInputElement>(
+    '#password'
+  );
+
+  // Buscar la casilla "Mostrar contraseña".
+  const mostrar = document.querySelector<HTMLInputElement>(
+    '#mostrar-password'
+  );
+
+
+  // 2. MOSTRAR U OCULTAR LA CONTRASEÑA
+
+  mostrar?.addEventListener('change', () => {
+
+    // Comprobar que exista el campo de contraseña.
+    if (password) {
+
+      // Si la casilla está marcada, mostrar la contraseña.
+      // Si no está marcada, ocultarla.
+      password.type = mostrar.checked
+        ? 'text'
+        : 'password';
+
+    }
+
+  });
+
+
+  // 3. COMPROBAR SI EL USUARIO CAMBIÓ SU CONTRASEÑA
+
+  // Leer los parámetros de la dirección web.
+  const parametros = new URLSearchParams(
+    window.location.search
+  );
+
+  // Comprobar si el usuario viene del cambio de contraseña.
+  if (parametros.get('cambio') === 'ok' && mensaje) {
+
+    // Mostrar confirmación.
+    mensaje.textContent =
+      'Contraseña actualizada. Inicia sesión con tu nueva contraseña.';
+
+    // Aplicar colores verdes al mensaje.
+    mensaje.className =
+      'rounded-md bg-green-50 p-3 text-sm text-green-700';
+
+  }
+
+
+  // 4. ENVIAR EL FORMULARIO AL BACKEND
+
+  form?.addEventListener('submit', async (evento) => {
+
+    // Evitar que el navegador recargue la página.
+    evento.preventDefault();
+
+    // Verificar que los campos sean válidos.
+    if (!form.reportValidity() || !boton || !mensaje) {
+      return;
+    }
+
+    // Obtener los datos del formulario.
+    const datos = new FormData(form);
+
+    // Obtener el correo ingresado.
+    const email = String(
+      datos.get('email') || ''
+    ).trim();
+
+    // Obtener la contraseña ingresada.
+    const clave = String(
+      datos.get('password') || ''
+    );
+
+    // Desactivar el botón para evitar varios envíos.
+    boton.disabled = true;
+
+    // Cambiar temporalmente el texto del botón.
+    boton.textContent = 'Verificando credenciales...';
+
+    // Ocultar los mensajes anteriores.
+    mensaje.classList.add('hidden');
+
+    try {
+
+      // 5. CONECTAR CON EL BACKEND NODE.JS + EXPRESS
+
+      // Enviar los datos a la API de autenticación.
+      const respuesta = await fetch(
+        'http://localhost:3006/api/auth/login',
+        {
+          // POST se utiliza para enviar credenciales.
+          method: 'POST',
+
+          // Permitir las cookies de sesión.
+          credentials: 'include',
+
+          // Indicar que los datos son JSON.
+          headers: {
+            'Content-Type': 'application/json'
+          },
+
+          // Convertir correo y contraseña a JSON.
+          body: JSON.stringify({
+            email: email,
+            password: clave
+          })
+        }
+      );
+
+      // Leer la respuesta del servidor.
+      const resultado = await respuesta.json();
+
+
+      // 6. COMPROBAR SI EL LOGIN FUE CORRECTO
+
+      // Si el backend devolvió un error, mostrar su mensaje.
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.mensaje ||
+          'No se pudo iniciar sesión.'
+        );
+      }
+
+      // Comprobar que la respuesta tenga los datos del usuario.
+      if (!resultado.usuario) {
+        throw new Error(
+          'El servidor no devolvió los datos del usuario.'
+        );
+      }
+
+
+      // 7. VERIFICAR SI DEBE CAMBIAR SU CONTRASEÑA
+
+      // Las cuentas nuevas deben reemplazar su clave temporal.
+      if (resultado.usuario.requiereCambio) {
+
+        // Redirigir al formulario de cambio de contraseña.
+        window.location.href = '/cambiar-password';
+
+        return;
+      }
+
+
+      // 8. REDIRIGIR SEGÚN EL ROL DEL USUARIO
+
+      // Si el usuario es coordinador, abrir su Dashboard.
+      if (resultado.usuario.rol === 'coordinador') {
+
+        window.location.href = '/dashboard';
+
+      }
+
+      // Si es voluntario o personal, abrir su portal.
+      else if (
+        resultado.usuario.rol === 'voluntario' ||
+        resultado.usuario.rol === 'personal'
+      ) {
+
+        window.location.href = '/portal';
+
+      }
+
+      // Si el servidor devuelve un rol desconocido.
+      else {
+        throw new Error(
+          'El usuario no tiene un rol válido.'
+        );
+      }
+
+    } catch (error) {
+
+      // 9. MOSTRAR ERRORES DE AUTENTICACIÓN
+
+      // Obtener el mensaje de error.
+      mensaje.textContent =
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error inesperado.';
+
+      // Aplicar estilos rojos al mensaje.
+      mensaje.className =
+        'rounded-md bg-red-50 p-3 text-sm text-red-700';
+
+    } finally {
+
+      // 10. RESTABLECER EL BOTÓN
+
+      // Volver a habilitar el botón.
+      boton.disabled = false;
+
+      // Restaurar su texto original.
+      boton.textContent = 'Iniciar sesión';
+
+    }
+
+  });
+
+</script>

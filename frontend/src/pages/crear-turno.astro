@@ -1,0 +1,947 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/AppShell.astro';
+import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimodal.astro';
+---
+
+<Layout>
+  <AppShell
+    titulo="Crear un turno"
+    descripcion="Organiza una actividad en tres pasos, revisa los datos y publícala."
+    pagina="crear-turno"
+  >
+    <!-- ESTADOS DE INTERFAZ -->
+    <div class="mb-3 flex flex-wrap items-center gap-3">
+      <label for="vista" class="text-sm font-medium">
+        Vista de estados:
+      </label>
+      <select id="vista" class="campo-select">
+        <option value="real">Datos reales · MySQL</option>
+        <option value="ideal">Ideal · Ejemplo Figma</option>
+        <option value="empty">Empty · Vacío</option>
+        <option value="partial">Partial · Parcial</option>
+        <option value="loading">Loading · Cargando</option>
+        <option value="error">Error · Recuperación</option>
+      </select>
+      <p id="origen" role="status"
+         class="text-xs text-emerald-700 dark:text-emerald-400">
+        Modo real: los cambios pueden guardarse en MySQL.
+      </p>
+    </div>
+
+    <!-- INDICADORES DE LOS TRES PASOS -->
+    <nav aria-label="Pasos para crear un turno" class="mb-3">
+      <ol class="grid gap-2 sm:grid-cols-3">
+        <li><span id="indicador-1" aria-current="step" class="indicador activo">
+          1 Información general
+        </span></li>
+        <li><span id="indicador-2" class="indicador">
+          2 Personal y funciones
+        </span></li>
+        <li><span id="indicador-3" class="indicador">
+          3 Revisar y publicar
+        </span></li>
+      </ol>
+      <p id="numero-paso"
+         class="mt-2 text-right text-xs text-slate-600 dark:text-slate-300">
+        Paso 1 de 3
+      </p>
+    </nav>
+
+    <div class="grid items-start gap-3 lg:grid-cols-[minmax(0,1.8fr)_minmax(245px,0.8fr)]">
+
+      <!-- FORMULARIO PRINCIPAL -->
+      <div class="min-w-0 rounded-xl bg-white p-5 shadow-sm
+                  dark:bg-slate-900 sm:p-6">
+
+        <div id="cargando" hidden role="status" class="space-y-4">
+          <p class="font-semibold">Cargando información...</p>
+          <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
+          <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
+          <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
+        </div>
+
+        <!-- CONFIRMACIÓN DEL SERVIDOR -->
+        <section id="resultado" hidden tabindex="-1">
+          <div class="mb-4 text-4xl text-emerald-700" aria-hidden="true">✓</div>
+          <h2 id="resultado-titulo" class="text-xl font-bold">
+            Turno guardado
+          </h2>
+          <p id="resultado-mensaje" class="mt-3 text-sm"></p>
+          <p id="resultado-id" class="mt-3 font-semibold"></p>
+
+          <div class="mt-6 flex flex-wrap gap-2">
+            <a id="ver-calendario" href="/calendario"
+               class="boton-primario">
+              Ver en calendario
+            </a>
+            <button id="crear-otro" type="button"
+                    class="boton-secundario">
+              Crear otro turno
+            </button>
+          </div>
+        </section>
+
+        <form id="form-turno" novalidate>
+
+          <!-- PASO 1 -->
+          <section id="paso-1" aria-labelledby="titulo-1">
+            <h2 id="titulo-1" tabindex="-1" class="text-lg font-bold">
+              Información general
+            </h2>
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+              Define qué actividad se realizará, dónde y en qué horario.
+            </p>
+
+            <div class="space-y-4">
+              <div>
+                <label for="actividad" class="etiqueta">Actividad *</label>
+                <input id="actividad" class="campo" type="text"
+                       required minlength="5" maxlength="120"
+                       placeholder="Reforestación · Cerro Azul" />
+              </div>
+
+              <div>
+                <label for="lugar" class="etiqueta">Lugar *</label>
+                <input id="lugar" class="campo" type="text"
+                       required minlength="5" maxlength="200"
+                       placeholder="Sector Cerro Azul, Abancay" />
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-[1.2fr_1fr_1fr]">
+                <div>
+                  <label for="fecha" class="etiqueta">Fecha *</label>
+                  <input id="fecha" class="campo" type="date" required />
+                </div>
+
+                <div>
+                  <label for="inicio" class="etiqueta">Hora de inicio *</label>
+                  <input id="inicio" class="campo" type="time" required />
+                </div>
+
+                <div>
+                  <label for="fin" class="etiqueta">Hora de fin *</label>
+                  <input id="fin" class="campo" type="time" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 flex flex-wrap items-center justify-between
+                        gap-3 border-t border-slate-200 pt-4
+                        dark:border-slate-700">
+              <p class="text-xs text-slate-600 dark:text-slate-300">
+                Siguiente: configurar cupos y responsable.
+              </p>
+              <button id="siguiente-1" type="button" class="boton-primario">
+                Siguiente →
+              </button>
+            </div>
+          </section>
+
+          <!-- PASO 2 -->
+          <section id="paso-2" hidden aria-labelledby="titulo-2">
+            <h2 id="titulo-2" tabindex="-1" class="text-lg font-bold">
+              Personal y funciones
+            </h2>
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+              Define cuántas personas necesitas y quién coordinará la actividad.
+            </p>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label for="cupos" class="etiqueta">
+                  Cupos necesarios *
+                </label>
+                <input id="cupos" class="campo" type="number"
+                       min="1" max="500" step="1" required
+                       placeholder="20" />
+              </div>
+
+              <div>
+                <label for="responsable" class="etiqueta">
+                  Responsable del turno
+                </label>
+                <input id="responsable" class="campo" type="text"
+                       readonly aria-describedby="ayuda-responsable" />
+              </div>
+            </div>
+
+            <p id="ayuda-responsable"
+               class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+              Se asigna automáticamente el coordinador autenticado.
+            </p>
+
+            <div class="mt-4">
+              <label for="funciones" class="etiqueta">
+                Funciones y habilidades *
+              </label>
+              <textarea id="funciones" class="campo" rows="3"
+                        required minlength="3" maxlength="500"
+                        placeholder="Plantación · primeros auxilios · logística"></textarea>
+            </div>
+
+            <div class="mt-5 rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
+              <h3 class="text-sm font-bold text-emerald-800 dark:text-emerald-300">
+                Recomendación
+              </h3>
+              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                Indica las habilidades necesarias para que el equipo se prepare.
+              </p>
+            </div>
+
+            <div class="mt-7 flex justify-between gap-3 border-t
+                        border-slate-200 pt-4 dark:border-slate-700">
+              <button id="anterior-2" type="button" class="boton-secundario">
+                ← Anterior
+              </button>
+              <button id="siguiente-2" type="button" class="boton-primario">
+                Siguiente →
+              </button>
+            </div>
+          </section>
+
+          <!-- PASO 3 -->
+          <section id="paso-3" hidden aria-labelledby="titulo-3">
+            <h2 id="titulo-3" tabindex="-1" class="text-lg font-bold">
+              Revisar y publicar
+            </h2>
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+              Comprueba la información antes de confirmar el turno.
+            </p>
+
+            <h3 class="mb-3 text-xs font-bold uppercase text-slate-600
+                       dark:text-slate-300">
+              Información general
+            </h3>
+
+            <dl class="space-y-3 text-sm">
+              <div class="fila-revision">
+                <dt>Actividad</dt>
+                <dd id="rev-actividad"></dd>
+              </div>
+              <div class="fila-revision">
+                <dt>Lugar</dt>
+                <dd id="rev-lugar"></dd>
+              </div>
+              <div class="fila-revision">
+                <dt>Fecha y horario</dt>
+                <dd id="rev-fecha"></dd>
+              </div>
+            </dl>
+
+            <hr class="my-5 border-slate-200 dark:border-slate-700" />
+
+            <h3 class="mb-3 text-xs font-bold uppercase text-slate-600
+                       dark:text-slate-300">
+              Personal y funciones
+            </h3>
+
+            <dl class="space-y-3 text-sm">
+              <div class="fila-revision">
+                <dt>Cupos</dt>
+                <dd id="rev-cupos"></dd>
+              </div>
+              <div class="fila-revision">
+                <dt>Responsable</dt>
+                <dd id="rev-responsable"></dd>
+              </div>
+              <div class="fila-revision">
+                <dt>Funciones</dt>
+                <dd id="rev-funciones"></dd>
+              </div>
+            </dl>
+
+            <p class="mt-5 rounded-lg bg-emerald-50 p-3
+                      text-xs font-medium text-emerald-900
+                      dark:bg-emerald-950 dark:text-emerald-200">
+              ✓ La información está lista para revisión final.
+            </p>
+
+            <div class="mt-4 flex flex-wrap justify-between gap-2">
+              <button id="editar" type="button" class="boton-secundario">
+                ← Editar datos
+              </button>
+
+              <div class="flex flex-wrap gap-2">
+                <button id="borrador" type="button" class="boton-secundario">
+                  Guardar borrador
+                </button>
+                <BotonConfirmacionMultimodal
+                  id="publicar"
+                  texto="Publicar turno"
+                  tipo="button"
+                />
+              </div>
+            </div>
+          </section>
+
+        </form>
+
+        <p id="mensaje" hidden role="alert" aria-live="assertive"
+           class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-900
+                  dark:bg-red-950 dark:text-red-200"></p>
+      </div>
+
+      <!-- PANEL DERECHO -->
+      <aside aria-label="Resumen y consejos del turno"
+             class="rounded-xl bg-emerald-50 p-5 text-emerald-950
+                    dark:bg-slate-900 dark:text-slate-100">
+        <h2 id="titulo-lateral" class="font-bold">Consejo</h2>
+        <p id="consejo-lateral" class="mt-2 text-sm leading-relaxed">
+          Completa primero los datos básicos. La fecha y las horas
+          ayudarán a evitar conflictos.
+        </p>
+
+        <hr class="my-4 border-emerald-200 dark:border-slate-700" />
+
+        <h3 class="mb-2 text-xs font-bold">Resumen del turno</h3>
+        <p id="resumen-nombre" class="break-words text-sm font-semibold">
+          Sin actividad
+        </p>
+        <p id="resumen-fecha" class="mt-1 text-xs">
+          Sin fecha y horario
+        </p>
+        <p id="resumen-cupos" class="mt-2 text-sm font-semibold">
+          Cupos sin definir
+        </p>
+        <p id="resumen-responsable" class="mt-1 text-xs">
+          Responsable: pendiente
+        </p>
+        <span id="etiqueta-estado"
+              class="mt-3 inline-flex rounded-md bg-amber-100
+                     px-3 py-1 text-xs font-bold text-amber-950">
+          Borrador sin guardar
+        </span>
+      </aside>
+    </div>
+  </AppShell>
+</Layout>
+
+<style is:global>
+  .campo, .campo-select {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 12px;
+    background: white;
+    color: #0f172a;
+    font-size: 14px;
+  }
+
+  .campo-select { width: auto; }
+
+  .campo:focus-visible,
+  .campo-select:focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 2px;
+  }
+
+  .campo[readonly] { background: #f1f5f9; }
+
+  .dark .campo,
+  .dark .campo-select {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+
+  .dark .campo[readonly] { background: #1e293b; }
+
+  .campo::placeholder { color: #64748b; }
+  .dark .campo::placeholder { color: #cbd5e1; }
+
+  .etiqueta {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .indicador {
+    display: block;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    background: white;
+    color: #334155;
+  }
+
+  .indicador.activo {
+    background: #047857;
+    color: white;
+  }
+
+  .dark .indicador {
+    background: #1e293b;
+    color: #e2e8f0;
+  }
+
+  .dark .indicador.activo {
+    background: #047857;
+    color: white;
+  }
+
+  .boton-primario,
+  .boton-secundario {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .boton-primario {
+    background: #047857;
+    color: white;
+  }
+
+  .boton-primario:hover { background: #065f46; }
+
+  .boton-secundario {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #0f172a;
+  }
+
+  .dark .boton-secundario {
+    border-color: #475569;
+    background: #1e293b;
+    color: white;
+  }
+
+  .boton-primario:focus-visible,
+  .boton-secundario:focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 3px;
+  }
+
+  .boton-primario:disabled,
+  .boton-secundario:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+
+  .fila-revision {
+    display: grid;
+    grid-template-columns: 110px minmax(0,1fr);
+    gap: 12px;
+  }
+
+  .fila-revision dt { color: #475569; }
+  .fila-revision dd {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .dark .fila-revision dt { color: #cbd5e1; }
+
+  [hidden] { display: none !important; }
+</style>
+
+<script>
+  const campo = (id: string) =>
+    document.getElementById(id) as HTMLInputElement;
+
+  const elemento = (id: string) =>
+    document.getElementById(id) as HTMLElement;
+
+  const actividad = campo('actividad');
+  const lugar = campo('lugar');
+  const fecha = campo('fecha');
+  const inicio = campo('inicio');
+  const fin = campo('fin');
+  const cupos = campo('cupos');
+  const responsable = campo('responsable');
+
+  const funciones =
+    document.getElementById('funciones') as HTMLTextAreaElement;
+
+  const vista =
+    document.getElementById('vista') as HTMLSelectElement;
+
+  const formulario =
+    document.getElementById('form-turno') as HTMLFormElement;
+
+  const publicar = campo('publicar') as HTMLButtonElement;
+  const borrador = campo('borrador') as HTMLButtonElement;
+  const etiquetaPublicar = publicar.querySelector<HTMLElement>('[data-etiqueta]');
+  const multimodal = publicar.closest<HTMLElement>('[data-multimodal]');
+
+  function textoPublicar(texto: string) {
+    if (etiquetaPublicar) etiquetaPublicar.textContent = texto;
+  }
+
+  function reiniciarMultimodal() {
+    multimodal?.dispatchEvent(new Event('multimodal:reiniciar'));
+  }
+
+  let paso = 1;
+  let autorizado = false;
+  let guardando = false;
+  let nombreCoordinador = '';
+
+  function hoyPeru() {
+    const partes = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date());
+
+    const datos = Object.fromEntries(
+      partes.map(p => [p.type, p.value])
+    );
+
+    return `${datos.year}-${datos.month}-${datos.day}`;
+  }
+
+  fecha.min = hoyPeru();
+
+  function modoDemostracion() {
+    return vista.value !== 'real';
+  }
+
+  function mensaje(texto: string, error = true) {
+    const salida = elemento('mensaje');
+    salida.hidden = !texto;
+    salida.textContent = texto;
+
+    salida.className = error
+      ? 'mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-900 dark:bg-red-950 dark:text-red-200'
+      : 'mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200';
+  }
+
+  function resumen() {
+    elemento('resumen-nombre').textContent =
+      actividad.value.trim() || 'Sin actividad';
+
+    elemento('resumen-fecha').textContent = fecha.value
+      ? `${fecha.value} · ${inicio.value || '--:--'}–${fin.value || '--:--'}`
+      : 'Sin fecha y horario';
+
+    elemento('resumen-cupos').textContent =
+      cupos.value ? `${cupos.value} cupos` : 'Cupos sin definir';
+
+    elemento('resumen-responsable').textContent =
+      `Responsable: ${responsable.value || 'pendiente'}`;
+  }
+
+  function mostrarPaso(numero: number) {
+    paso = numero;
+
+    for (let i = 1; i <= 3; i++) {
+      elemento(`paso-${i}`).hidden = i !== numero;
+
+      const indicador = elemento(`indicador-${i}`);
+      indicador.classList.toggle('activo', i <= numero);
+
+      if (i === numero) {
+        indicador.setAttribute('aria-current', 'step');
+      } else {
+        indicador.removeAttribute('aria-current');
+      }
+    }
+
+    elemento('numero-paso').textContent = `Paso ${numero} de 3`;
+
+    const titulos = ['Consejo', 'Equipo requerido', 'Todo listo'];
+    const consejos = [
+      'Completa primero los datos básicos. La fecha y las horas ayudarán a evitar conflictos.',
+      'Indica las funciones necesarias para que el equipo se prepare.',
+      'Comprueba los datos y elige Guardar borrador o Publicar turno.'
+    ];
+
+    elemento('titulo-lateral').textContent = titulos[numero - 1];
+    elemento('consejo-lateral').textContent = consejos[numero - 1];
+
+    if (numero === 3) actualizarRevision();
+
+    mensaje('');
+  }
+
+  function validarCampos(
+    campos: Array<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    for (const item of campos) {
+      if (!item.checkValidity()) {
+        item.reportValidity();
+        item.focus();
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function validarPaso1() {
+    if (!validarCampos([actividad, lugar, fecha, inicio, fin])) {
+      return false;
+    }
+
+    if (fecha.value < hoyPeru()) {
+      mensaje('La fecha no puede estar en el pasado.');
+      fecha.focus();
+      return false;
+    }
+
+    if (fin.value <= inicio.value) {
+      mensaje('La hora de fin debe ser posterior a la hora de inicio.');
+      fin.focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  function validarPaso2() {
+    if (!validarCampos([cupos, funciones])) return false;
+
+    const cantidad = Number(cupos.value);
+
+    if (!Number.isInteger(cantidad) ||
+        cantidad < 1 || cantidad > 500) {
+      mensaje('Los cupos deben ser un entero entre 1 y 500.');
+      cupos.focus();
+      return false;
+    }
+
+    if (!responsable.value) {
+      mensaje('No se identificó al coordinador autenticado.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function actualizarRevision() {
+    const datos: Record<string, string> = {
+      'rev-actividad': actividad.value,
+      'rev-lugar': lugar.value,
+      'rev-fecha':
+        `${fecha.value} · ${inicio.value}–${fin.value}`,
+      'rev-cupos': `${cupos.value} personas`,
+      'rev-responsable': responsable.value,
+      'rev-funciones': funciones.value
+    };
+
+    Object.entries(datos).forEach(([id, valor]) => {
+      elemento(id).textContent = valor;
+    });
+
+    resumen();
+  }
+
+  // NAVEGACIÓN ENTRE LOS TRES PASOS
+  elemento('siguiente-1').addEventListener('click', () => {
+    if (modoDemostracion() || validarPaso1()) {
+      mostrarPaso(2);
+      elemento('titulo-2').focus();
+    }
+  });
+
+  elemento('anterior-2').addEventListener('click', () => {
+    mostrarPaso(1);
+    elemento('titulo-1').focus();
+  });
+
+  elemento('siguiente-2').addEventListener('click', () => {
+    if (modoDemostracion() || validarPaso2()) {
+      mostrarPaso(3);
+      elemento('titulo-3').focus();
+    }
+  });
+
+  elemento('editar').addEventListener('click', () => {
+    mostrarPaso(1);
+    elemento('titulo-1').focus();
+  });
+
+  // SUGERENCIA DE DURACIÓN DE CUATRO HORAS
+  inicio.addEventListener('change', () => {
+    if (inicio.value && !fin.value) {
+      const [horas, minutos] = inicio.value.split(':').map(Number);
+
+      if (horas + 4 <= 23) {
+        fin.value =
+          `${String(horas + 4).padStart(2, '0')}:` +
+          `${String(minutos).padStart(2, '0')}`;
+      }
+    }
+
+    resumen();
+  });
+
+  [actividad, lugar, fecha, inicio, fin, cupos, funciones].forEach(item => {
+    item.addEventListener('input', () => {
+      mensaje('');
+      resumen();
+    });
+  });
+
+  // EJEMPLO DEL PROTOTIPO FIGMA
+  function cargarEjemplo() {
+    actividad.value = 'Reforestación · Cerro Azul';
+    lugar.value = 'Sector Cerro Azul, Abancay';
+    fecha.value = '2026-10-19';
+    inicio.value = '08:00';
+    fin.value = '12:00';
+    cupos.value = '20';
+    responsable.value = 'José de la Cuba (ejemplo Figma)';
+    funciones.value = 'Plantación · primeros auxilios · logística';
+  }
+
+  function cambiarVista() {
+    reiniciarMultimodal();
+    formulario.hidden = false;
+    elemento('resultado').hidden = true;
+    elemento('cargando').hidden = true;
+
+    formulario.reset();
+    responsable.value = nombreCoordinador;
+
+    elemento('etiqueta-estado').textContent =
+      'Borrador sin guardar';
+
+    mostrarPaso(1);
+
+    const estado = vista.value;
+
+    elemento('origen').textContent = estado === 'real'
+      ? 'Modo real: los cambios pueden guardarse en MySQL.'
+      : 'Demostración UI Stack: no se guardarán datos en MySQL.';
+
+    if (estado === 'ideal') {
+      cargarEjemplo();
+    }
+
+    if (estado === 'partial') {
+      actividad.value = 'Reforestación · Cerro Azul';
+      lugar.value = 'Sector Cerro Azul, Abancay';
+
+      mensaje(
+        'Estado Partial: faltan fecha, horario, cupos y funciones.',
+        false
+      );
+    }
+
+    if (estado === 'empty') {
+      mensaje('Estado Empty: completa los campos para comenzar.', false);
+    }
+
+    if (estado === 'error') {
+      mensaje(
+        'Estado Error simulado: no se pudieron recuperar sugerencias.',
+        true
+      );
+    }
+
+    if (estado === 'loading') {
+      formulario.hidden = true;
+      elemento('cargando').hidden = false;
+    }
+
+    resumen();
+  }
+
+  vista.addEventListener('change', cambiarVista);
+
+  // GUARDAR EN MYSQL
+  async function guardar(estado: 'borrador' | 'publicado') {
+    if (guardando) return;
+
+    if (modoDemostracion()) {
+      mensaje(
+        'Selecciona Datos reales · MySQL para guardar o publicar.'
+      );
+      return;
+    }
+
+    if (!autorizado) {
+      mensaje('Primero debes iniciar sesión como coordinador.');
+      return;
+    }
+
+    if (!validarPaso1()) {
+      mostrarPaso(1);
+      validarPaso1();
+      return;
+    }
+
+    if (!validarPaso2()) {
+      mostrarPaso(2);
+      validarPaso2();
+      return;
+    }
+
+    guardando = true;
+    publicar.disabled = true;
+    borrador.disabled = true;
+
+    textoPublicar(
+      estado === 'publicado' ? 'Publicando...' : 'Publicar turno'
+    );
+
+    borrador.textContent =
+      estado === 'borrador' ? 'Guardando...' : 'Guardar borrador';
+
+    mensaje('Guardando el turno en MySQL...', false);
+
+    const datos = {
+      titulo: actividad.value.trim(),
+      ubicacion: lugar.value.trim(),
+      fecha: fecha.value,
+      hora_inicio: inicio.value,
+      hora_fin: fin.value,
+      cupos: Number(cupos.value),
+      funciones: funciones.value.trim(),
+      estado
+    };
+
+    try {
+      const respuesta = await fetch(
+        'http://localhost:3006/api/turnos',
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(datos)
+        }
+      );
+
+      if (respuesta.status === 401) {
+        window.location.replace('/login');
+        return;
+      }
+
+      const resultado = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.mensaje || 'No se pudo guardar el turno.'
+        );
+      }
+
+      // La respuesta exitosa del servidor confirma el guardado.
+      if (estado === 'publicado') {
+        multimodal?.dispatchEvent(new Event('multimodal:exito'));
+      }
+
+      formulario.hidden = true;
+      elemento('resultado').hidden = false;
+      mensaje('');
+
+      elemento('resultado-titulo').textContent =
+        estado === 'publicado'
+          ? 'Turno publicado'
+          : 'Borrador guardado';
+
+      elemento('resultado-mensaje').textContent = resultado.mensaje;
+
+      elemento('resultado-id').textContent =
+        `Registro N.º ${resultado.turno.id_turno} · ${datos.titulo}`;
+
+      elemento('etiqueta-estado').textContent =
+        estado === 'publicado'
+          ? 'Publicado ✓'
+          : 'Borrador guardado ✓';
+
+      const enlace =
+        document.getElementById('ver-calendario') as HTMLAnchorElement;
+
+      enlace.href =
+        `/calendario?modo=real&fecha=${encodeURIComponent(datos.fecha)}`;
+
+      elemento('resultado').focus();
+
+    } catch (error) {
+      mensaje(
+        error instanceof Error
+          ? error.message
+          : 'Error inesperado al guardar.'
+      );
+
+    } finally {
+      guardando = false;
+      publicar.disabled = false;
+      borrador.disabled = false;
+      textoPublicar('Publicar turno');
+      borrador.textContent = 'Guardar borrador';
+    }
+  }
+
+  publicar.addEventListener('click', () => {
+    // Preparar el audio durante el gesto del usuario.
+    multimodal?.dispatchEvent(new Event('multimodal:preparar'));
+    void guardar('publicado');
+  });
+  borrador.addEventListener('click', () => guardar('borrador'));
+
+  elemento('crear-otro').addEventListener('click', () => {
+    reiniciarMultimodal();
+    vista.value = 'real';
+    cambiarVista();
+    actividad.focus();
+  });
+
+  // OBTENER EL COORDINADOR AUTENTICADO
+  document.addEventListener(
+    'volunturno:autorizado',
+    async () => {
+      try {
+        const respuesta = await fetch(
+          'http://localhost:3006/api/auth/me',
+          { credentials: 'include' }
+        );
+
+        if (!respuesta.ok) {
+          throw new Error('Sesión no válida');
+        }
+
+        const datos = await respuesta.json();
+        const usuario = datos.usuario;
+
+        if (
+          usuario.rol !== 'coordinador' ||
+          Boolean(
+            usuario.requiereCambio ||
+            usuario.requiere_cambio_password
+          )
+        ) {
+          window.location.replace('/login');
+          return;
+        }
+
+        nombreCoordinador =
+          `${usuario.nombre} ${usuario.apellido}`.trim();
+
+        autorizado = true;
+
+        if (vista.value === 'real') {
+          responsable.value = nombreCoordinador;
+        }
+
+        resumen();
+
+      } catch {
+        mensaje(
+          'No se pudo identificar al coordinador. Comprueba Express.'
+        );
+      }
+    },
+    { once: true }
+  );
+
+  mostrarPaso(1);
+  resumen();
+</script>

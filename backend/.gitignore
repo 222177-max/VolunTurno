@@ -1,0 +1,25 @@
+
+# Credenciales y archivos privados
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Dependencias
+node_modules/
+
+# Astro
+.astro/
+dist/
+
+# Python
+.venv/
+__pycache__/
+
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/

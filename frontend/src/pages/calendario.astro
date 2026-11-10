@@ -1,0 +1,833 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/AppShell.astro';
+---
+
+<Layout>
+  <AppShell
+    titulo="Calendario"
+    descripcion="Consulta los turnos por semana y selecciona una actividad para ver sus detalles."
+    pagina="calendario"
+  >
+    <!-- ENCABEZADO DEL CALENDARIO -->
+    <section
+      aria-label="Navegación entre semanas"
+      class="rounded-xl bg-white px-4 py-4 shadow-sm
+             dark:bg-slate-900"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 id="mes-calendario"
+              class="text-base font-bold capitalize">
+            Octubre 2026
+          </h2>
+
+          <p id="rango-semana"
+             class="mt-1 text-xs text-slate-600
+                    dark:text-slate-300">
+            Semana del 19 al 25 de octubre
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="anterior" type="button"
+            class="rounded-lg border border-slate-200 px-3 py-2
+                   text-xs font-semibold hover:bg-slate-100
+                   focus-visible:outline-2
+                   focus-visible:outline-emerald-600
+                   dark:border-slate-700 dark:hover:bg-slate-800">
+            ← Anterior
+          </button>
+
+          <button id="hoy" type="button"
+            class="rounded-lg border border-slate-200 px-3 py-2
+                   text-xs font-semibold hover:bg-slate-100
+                   focus-visible:outline-2
+                   focus-visible:outline-emerald-600
+                   dark:border-slate-700 dark:hover:bg-slate-800">
+            Hoy
+          </button>
+
+          <button id="siguiente" type="button"
+            class="rounded-lg border border-slate-200 px-3 py-2
+                   text-xs font-semibold hover:bg-slate-100
+                   focus-visible:outline-2
+                   focus-visible:outline-emerald-600
+                   dark:border-slate-700 dark:hover:bg-slate-800">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADOS DE IHC -->
+    <section
+      aria-label="Estados de la interfaz"
+      class="mt-3 flex flex-wrap items-center gap-3"
+    >
+      <label for="estado-calendario" class="text-xs font-semibold">
+        Vista de estados:
+      </label>
+
+      <select
+        id="estado-calendario"
+        class="rounded-lg border border-slate-300 bg-white
+               px-3 py-2 text-xs
+               focus-visible:outline-2
+               focus-visible:outline-emerald-600
+               dark:border-slate-700 dark:bg-slate-900"
+      >
+        <option value="ideal" selected>
+          Ideal · Ejemplo de Figma
+        </option>
+        <option value="real">Datos reales de MySQL</option>
+        <option value="empty">Empty · Vacío</option>
+        <option value="loading">Loading · Cargando</option>
+        <option value="partial">Partial · Parcial</option>
+        <option value="error">Error · Fallo de carga</option>
+      </select>
+
+      <span id="origen-datos"
+            class="text-xs text-amber-800
+                   dark:text-amber-300"
+            aria-live="polite">
+        Demostración: datos de ejemplo
+      </span>
+    </section>
+
+    <!-- CALENDARIO EN 7 COLUMNAS -->
+    <section
+      aria-label="Calendario semanal de turnos"
+      class="mt-3 rounded-xl bg-slate-100 p-2
+             dark:bg-slate-900"
+    >
+      <div
+        class="vt-calendario-desplazamiento"
+        role="region"
+        tabindex="0"
+        aria-label="Calendario de siete días. En pantallas pequeñas puedes desplazarte horizontalmente."
+      >
+        <div id="vt-dias" class="vt-calendario-grid"></div>
+      </div>
+    </section>
+
+    <!-- FEEDBACK -->
+    <section
+      id="mensaje-calendario"
+      role="status"
+      aria-live="polite"
+      class="mt-3 rounded-lg bg-emerald-50 px-4 py-3
+             text-xs text-emerald-900
+             dark:bg-emerald-950 dark:text-emerald-200"
+    >
+      Selecciona una actividad para consultar sus detalles.
+    </section>
+
+    <!-- ACCIÓN PARA CREAR TURNO -->
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-slate-600 dark:text-slate-300">
+        Consejo: selecciona un turno para ver su información completa.
+      </p>
+
+      <a
+        href="/crear-turno"
+        class="inline-flex items-center rounded-lg
+               bg-emerald-700 px-4 py-2.5 text-xs
+               font-semibold text-white hover:bg-emerald-800
+               focus-visible:outline-2
+               focus-visible:outline-offset-2
+               focus-visible:outline-emerald-600"
+      >
+        + Crear turno
+      </a>
+    </div>
+
+    <!-- VENTANA DE DETALLE -->
+    <dialog
+      id="detalle-turno"
+      aria-labelledby="detalle-titulo"
+      class="m-auto w-[min(92vw,460px)] rounded-xl
+             border border-slate-200 bg-white p-0
+             text-slate-900 shadow-2xl
+             backdrop:bg-slate-950/60
+             dark:border-slate-700 dark:bg-slate-900
+             dark:text-slate-100"
+    >
+      <div class="p-6">
+        <h2 id="detalle-titulo" class="text-xl font-bold">
+          Detalle del turno
+        </h2>
+
+        <dl id="detalle-datos" class="mt-5 space-y-3 text-sm"></dl>
+
+        <form method="dialog" class="mt-6">
+          <button
+            type="submit"
+            class="w-full rounded-lg bg-emerald-700
+                   px-4 py-3 text-sm font-semibold text-white
+                   hover:bg-emerald-800"
+          >
+            Cerrar
+          </button>
+        </form>
+      </div>
+    </dialog>
+
+  </AppShell>
+</Layout>
+
+<!-- ESTILOS ESPECÍFICOS PARA EL CALENDARIO -->
+<style is:global>
+  /* Fuerza las 7 columnas del diseño Figma */
+  #vt-dias.vt-calendario-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 8px;
+    min-width: 790px;
+    width: 100%;
+  }
+
+  .vt-calendario-desplazamiento {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .vt-calendario-desplazamiento:focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 2px;
+  }
+
+  /* Cada columna corresponde a un día */
+  .vt-dia {
+    min-width: 0;
+    min-height: 365px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #ffffff;
+  }
+
+  .vt-dia-encabezado {
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  /* Líneas horizontales de referencia, como en Figma */
+  .vt-dia-contenido {
+    min-height: 320px;
+    padding: 11px 5px;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 66px,
+        #e9eef5 66px,
+        #e9eef5 67px
+      );
+  }
+
+  .vt-turno {
+    display: block;
+    width: 100%;
+    margin-bottom: 7px;
+    padding: 9px 7px;
+    border: 0;
+    border-radius: 6px;
+    text-align: left;
+    cursor: pointer;
+    transition: box-shadow 120ms ease;
+    overflow-wrap: anywhere;
+  }
+
+  .vt-turno:hover {
+    box-shadow: inset 0 0 0 2px #059669;
+  }
+
+  .vt-turno:focus-visible {
+    outline: 3px solid #059669;
+    outline-offset: 2px;
+  }
+
+  .vt-turno-titulo {
+    display: block;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .vt-turno-horario {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .vt-turno-verde {
+    background: #d1fae5;
+    color: #064e3b;
+  }
+
+  .vt-turno-azul {
+    background: #dbeafe;
+    color: #1e3a8a;
+  }
+
+  .vt-turno-amarillo {
+    background: #fef3c7;
+    color: #78350f;
+  }
+
+  .vt-turno-morado {
+    background: #ede9fe;
+    color: #4c1d95;
+  }
+
+  .vt-esqueleto {
+    height: 55px;
+    border-radius: 6px;
+    margin-bottom: 9px;
+    background: #e2e8f0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .vt-esqueleto {
+      animation: vt-pulso 1.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes vt-pulso {
+    0%, 100% { opacity: .45; }
+    50% { opacity: 1; }
+  }
+
+  /* Modo oscuro */
+  .dark .vt-dia {
+    background: #0f172a;
+    border-color: #334155;
+  }
+
+  .dark .vt-dia-encabezado {
+    color: #e2e8f0;
+    border-color: #334155;
+  }
+
+  .dark .vt-dia-contenido {
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 66px,
+        #334155 66px,
+        #334155 67px
+      );
+  }
+
+  .dark .vt-turno-verde {
+    background: #064e3b;
+    color: #d1fae5;
+  }
+
+  .dark .vt-turno-azul {
+    background: #1e3a8a;
+    color: #dbeafe;
+  }
+
+  .dark .vt-turno-amarillo {
+    background: #78350f;
+    color: #fef3c7;
+  }
+
+  .dark .vt-turno-morado {
+    background: #4c1d95;
+    color: #ede9fe;
+  }
+
+  .dark .vt-esqueleto {
+    background: #334155;
+  }
+</style>
+
+<script>
+  type Turno = {
+    id_turno: number;
+    titulo: string;
+    descripcion: string | null;
+    fecha: string;
+    hora_inicio: string;
+    hora_fin: string;
+    ubicacion: string;
+    cupos: number;
+    ocupados: number;
+    estado: string;
+    color?: string;
+    desplazamiento?: number;
+  };
+
+  const dias = document.querySelector<HTMLElement>('#vt-dias');
+  const mesTexto = document.querySelector<HTMLElement>('#mes-calendario');
+  const rangoTexto = document.querySelector<HTMLElement>('#rango-semana');
+  const estadoSelector =
+    document.querySelector<HTMLSelectElement>('#estado-calendario');
+  const origenTexto = document.querySelector<HTMLElement>('#origen-datos');
+  const mensaje = document.querySelector<HTMLElement>('#mensaje-calendario');
+
+  const modal = document.querySelector<HTMLDialogElement>('#detalle-turno');
+  const tituloDetalle =
+    document.querySelector<HTMLElement>('#detalle-titulo');
+  const datosDetalle =
+    document.querySelector<HTMLElement>('#detalle-datos');
+
+  // Semana de referencia de la captura Figma
+  const lunesFigma = new Date(2026, 9, 19, 12);
+
+  function obtenerLunes(fecha: Date) {
+    const copia = new Date(
+      fecha.getFullYear(),
+      fecha.getMonth(),
+      fecha.getDate(),
+      12
+    );
+
+    copia.setDate(copia.getDate() - ((copia.getDay() + 6) % 7));
+    return copia;
+  }
+
+  function sumarDias(fecha: Date, cantidad: number) {
+    return new Date(
+      fecha.getFullYear(),
+      fecha.getMonth(),
+      fecha.getDate() + cantidad,
+      12
+    );
+  }
+
+  function fechaISO(fecha: Date) {
+    return [
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, '0'),
+      String(fecha.getDate()).padStart(2, '0')
+    ].join('-');
+  }
+
+
+  // LEER LOS PARÁMETROS ENVIADOS DESDE CREAR TURNO
+  const parametros = new URLSearchParams(window.location.search);
+
+  // Obtener la fecha del turno publicado
+  const fechaURL = parametros.get('fecha') || '';
+
+  // Convertir la fecha recibida
+  const fechaEnlace = /^\d{4}-\d{2}-\d{2}$/.test(fechaURL)
+    ? new Date(`${fechaURL}T12:00:00`)
+    : null;
+
+  // Mostrar la semana del turno publicado.
+  // Si no existe una fecha válida, mostrar la semana de Figma.
+  let lunesActual =
+    fechaEnlace && !Number.isNaN(fechaEnlace.getTime())
+      ? obtenerLunes(fechaEnlace)
+      : new Date(lunesFigma);
+
+  // Si venimos de Crear turno, seleccionar datos reales
+  if (parametros.get('modo') === 'real' && estadoSelector) {
+    estadoSelector.value = 'real';
+  }
+
+  // Variables de control
+  let autorizado = false;
+  let solicitudActual = 0;
+
+
+  // ACTIVIDADES SIMULADAS PARA MOSTRAR EL DISEÑO FIGMA
+  function datosFigma(): Turno[] {
+    const actividades = [
+      {
+        dia: 0,
+        titulo: 'Reforestación',
+        hora_inicio: '08:00',
+        hora_fin: '17:00',
+        ubicacion: 'Cerro Azul, Abancay',
+        cupos: 20,
+        ocupados: 13,
+        color: 'verde',
+        desplazamiento: 0
+      },
+      {
+        dia: 1,
+        titulo: 'Rescate de fauna',
+        hora_inicio: '10:00',
+        hora_fin: '12:00',
+        ubicacion: 'Centro de rescate',
+        cupos: 8,
+        ocupados: 8,
+        color: 'azul',
+        desplazamiento: 0
+      },
+      {
+        dia: 2,
+        titulo: 'Limpieza',
+        hora_inicio: '08:00',
+        hora_fin: '10:00',
+        ubicacion: 'Sector comunitario',
+        cupos: 12,
+        ocupados: 10,
+        color: 'amarillo',
+        desplazamiento: 0
+      },
+      {
+        dia: 3,
+        titulo: 'Capacitación',
+        hora_inicio: '09:00',
+        hora_fin: '10:30',
+        ubicacion: 'Sede Rescate Verde',
+        cupos: 15,
+        ocupados: 12,
+        color: 'morado',
+        desplazamiento: 1
+      },
+      {
+        dia: 4,
+        titulo: 'Mantenimiento',
+        hora_inicio: '08:00',
+        hora_fin: '11:00',
+        ubicacion: 'Vivero comunitario',
+        cupos: 6,
+        ocupados: 4,
+        color: 'verde',
+        desplazamiento: 0
+      }
+    ];
+
+    return actividades.map((item, indice) => ({
+      id_turno: -(indice + 1),
+      titulo: item.titulo,
+      descripcion: 'Actividad de ejemplo del prototipo Figma.',
+      fecha: fechaISO(sumarDias(lunesActual, item.dia)),
+      hora_inicio: item.hora_inicio,
+      hora_fin: item.hora_fin,
+      ubicacion: item.ubicacion,
+      cupos: item.cupos,
+      ocupados: item.ocupados,
+      estado: 'publicado',
+      color: item.color,
+      desplazamiento: item.desplazamiento
+    }));
+  }
+
+  function actualizarFechas() {
+    const domingo = sumarDias(lunesActual, 6);
+
+    if (mesTexto) {
+      mesTexto.textContent = new Intl.DateTimeFormat('es-PE', {
+        month: 'long',
+        year: 'numeric'
+      }).format(lunesActual);
+    }
+
+    if (rangoTexto) {
+      rangoTexto.textContent =
+        `Semana del ${lunesActual.getDate()} al ${domingo.getDate()} ` +
+        `de ${new Intl.DateTimeFormat('es-PE', {
+          month: 'long',
+          year: 'numeric'
+        }).format(domingo)}`;
+    }
+  }
+
+  function mostrarMensaje(texto: string, esError = false) {
+    if (!mensaje) return;
+
+    mensaje.textContent = texto;
+    mensaje.className = esError
+      ? `mt-3 rounded-lg bg-red-50 px-4 py-3 text-xs text-red-900
+         dark:bg-red-950 dark:text-red-200`
+      : `mt-3 rounded-lg bg-emerald-50 px-4 py-3 text-xs text-emerald-900
+         dark:bg-emerald-950 dark:text-emerald-200`;
+  }
+
+  // CREAR LAS 7 COLUMNAS
+  function dibujarCalendario(turnos: Turno[], cargando = false) {
+    if (!dias) return;
+
+    dias.replaceChildren();
+
+    const nombres = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+
+    for (let indice = 0; indice < 7; indice++) {
+      const fecha = sumarDias(lunesActual, indice);
+      const fechaTexto = fechaISO(fecha);
+
+      const columna = document.createElement('section');
+      columna.className = 'vt-dia';
+      columna.setAttribute(
+        'aria-label',
+        `${nombres[indice]} ${fecha.getDate()}`
+      );
+
+      const encabezado = document.createElement('h3');
+      encabezado.className = 'vt-dia-encabezado';
+      encabezado.textContent =
+        `${nombres[indice]} ${fecha.getDate()}`;
+
+      const contenido = document.createElement('div');
+      contenido.className = 'vt-dia-contenido';
+
+      if (cargando) {
+        const esqueleto = document.createElement('div');
+        esqueleto.className = 'vt-esqueleto';
+        esqueleto.setAttribute('aria-hidden', 'true');
+        contenido.append(esqueleto);
+      } else {
+        const actividades = turnos.filter(
+          (turno) => turno.fecha === fechaTexto
+        );
+
+        actividades.forEach((turno, posicion) => {
+          const tarjeta = document.createElement('button');
+          tarjeta.type = 'button';
+
+          const colores = ['verde', 'azul', 'amarillo', 'morado'];
+          const color = turno.color ||
+            colores[(indice + posicion) % colores.length];
+
+          tarjeta.className = `vt-turno vt-turno-${color}`;
+
+          // En la captura Figma, capacitación aparece más abajo.
+          if (turno.desplazamiento) {
+            tarjeta.style.marginTop = '60px';
+          }
+
+          const titulo = document.createElement('span');
+          titulo.className = 'vt-turno-titulo';
+          titulo.textContent = turno.titulo;
+
+          const horario = document.createElement('span');
+          horario.className = 'vt-turno-horario';
+
+          const disponibles = Math.max(
+            0,
+            Number(turno.cupos) - Number(turno.ocupados)
+          );
+
+          horario.textContent =
+            `${turno.hora_inicio}–${turno.hora_fin} · ` +
+            (disponibles === 0
+              ? 'Completo'
+              : `${disponibles} cupos`);
+
+          tarjeta.setAttribute(
+            'aria-label',
+            `Ver detalle de ${turno.titulo}, ` +
+            `${fechaTexto}, de ${turno.hora_inicio} a ${turno.hora_fin}`
+          );
+
+          tarjeta.append(titulo, horario);
+          tarjeta.addEventListener(
+            'click',
+            () => abrirDetalle(turno)
+          );
+
+          contenido.append(tarjeta);
+        });
+      }
+
+      columna.append(encabezado, contenido);
+      dias.append(columna);
+    }
+  }
+
+  // DETALLE DE TURNO
+  function abrirDetalle(turno: Turno) {
+    if (!modal || !tituloDetalle || !datosDetalle) return;
+
+    tituloDetalle.textContent = turno.titulo;
+    datosDetalle.replaceChildren();
+
+    const filas = [
+      ['Fecha', turno.fecha],
+      ['Horario', `${turno.hora_inicio} - ${turno.hora_fin}`],
+      ['Lugar', turno.ubicacion],
+      ['Cupos', String(turno.cupos)],
+      ['Disponibles', String(
+        Math.max(0, Number(turno.cupos) - Number(turno.ocupados))
+      )],
+      ['Estado', turno.estado],
+      ['Descripción', turno.descripcion || 'Sin descripción']
+    ];
+
+    for (const [etiqueta, valor] of filas) {
+      const fila = document.createElement('div');
+      fila.className = 'grid grid-cols-[110px_1fr] gap-3';
+
+      const termino = document.createElement('dt');
+      termino.className = 'text-slate-500 dark:text-slate-400';
+      termino.textContent = etiqueta;
+
+      const descripcion = document.createElement('dd');
+      descripcion.className = 'font-medium';
+      descripcion.textContent = valor;
+
+      fila.append(termino, descripcion);
+      datosDetalle.append(fila);
+    }
+
+    modal.showModal();
+  }
+
+  // CONSULTAR TURNOS REALES
+  async function consultarMySQL() {
+    const identificador = ++solicitudActual;
+
+    dibujarCalendario([], true);
+    mostrarMensaje('Consultando turnos registrados en MySQL...');
+
+    const desde = fechaISO(lunesActual);
+    const hasta = fechaISO(sumarDias(lunesActual, 6));
+
+    try {
+      const respuesta = await fetch(
+        `http://localhost:3006/api/turnos?desde=${desde}&hasta=${hasta}`,
+        { credentials: 'include' }
+      );
+
+      if (identificador !== solicitudActual) return;
+
+      if (respuesta.status === 401) {
+        window.location.replace('/login');
+        return;
+      }
+
+      if (!respuesta.ok) {
+        throw new Error('No se pudo cargar el calendario.');
+      }
+
+      const resultado = await respuesta.json();
+
+      if (identificador !== solicitudActual) return;
+
+      const turnos: Turno[] = resultado.turnos ?? [];
+
+      dibujarCalendario(turnos);
+
+      mostrarMensaje(
+        turnos.length === 0
+          ? 'No hay turnos registrados en esta semana. Utiliza Crear turno para agregar una actividad.'
+          : `${turnos.length} turno(s) encontrados en MySQL. Selecciona uno para consultar sus datos.`
+      );
+
+    } catch {
+      if (identificador !== solicitudActual) return;
+
+      dibujarCalendario([]);
+      mostrarMensaje(
+        'No se pudo conectar con el backend. Revisa Express y vuelve a seleccionar Datos reales.',
+        true
+      );
+    }
+  }
+
+  // CAMBIAR ENTRE ESTADOS DE LA INTERFAZ
+  function actualizarEstado() {
+    if (!autorizado) return;
+
+    ++solicitudActual;
+    actualizarFechas();
+
+    const estado = estadoSelector?.value ?? 'ideal';
+
+    if (origenTexto) {
+      origenTexto.textContent = estado === 'real'
+        ? 'Origen: MySQL'
+        : 'Modo demostración: datos simulados, no guardados en MySQL';
+
+      origenTexto.className = estado === 'real'
+        ? 'text-xs text-emerald-700 dark:text-emerald-400'
+        : 'text-xs text-amber-800 dark:text-amber-300';
+    }
+
+    if (estado === 'real') {
+      consultarMySQL();
+    } else if (estado === 'ideal') {
+      dibujarCalendario(datosFigma());
+      mostrarMensaje(
+        'Estado Ideal: calendario de ejemplo basado en Figma. Selecciona un turno para ver sus detalles.'
+      );
+    } else if (estado === 'empty') {
+      dibujarCalendario([]);
+      mostrarMensaje(
+        'Estado Empty: no existen actividades para esta semana.'
+      );
+    } else if (estado === 'loading') {
+      dibujarCalendario([], true);
+      mostrarMensaje(
+        'Estado Loading de demostración: esperando la información.'
+      );
+    } else if (estado === 'partial') {
+      dibujarCalendario(datosFigma().slice(0, 2));
+      mostrarMensaje(
+        'Estado Partial: solo una parte de las actividades está disponible.'
+      );
+    } else if (estado === 'error') {
+      dibujarCalendario([]);
+      mostrarMensaje(
+        'Estado Error de demostración: no fue posible obtener las actividades.',
+        true
+      );
+    }
+  }
+
+  // NAVEGACIÓN ENTRE SEMANAS
+  document.querySelector('#anterior')?.addEventListener('click', () => {
+    lunesActual = sumarDias(lunesActual, -7);
+    actualizarEstado();
+  });
+
+  document.querySelector('#siguiente')?.addEventListener('click', () => {
+    lunesActual = sumarDias(lunesActual, 7);
+    actualizarEstado();
+  });
+
+  document.querySelector('#hoy')?.addEventListener('click', () => {
+    lunesActual = obtenerLunes(new Date());
+
+    if (estadoSelector) {
+      estadoSelector.value = 'real';
+    }
+
+    actualizarEstado();
+  });
+
+  estadoSelector?.addEventListener('change', () => {
+    if (estadoSelector.value === 'ideal') {
+      lunesActual = new Date(lunesFigma);
+    }
+
+    if (estadoSelector.value === 'real') {
+      lunesActual = obtenerLunes(new Date());
+    }
+
+    actualizarEstado();
+  });
+
+  // ESPERAR LA AUTENTICACIÓN DEL APP SHELL
+  document.addEventListener(
+    'volunturno:autorizado',
+    () => {
+      autorizado = true;
+      actualizarEstado();
+    },
+    { once: true }
+  );
+
+  actualizarFechas();
+  dibujarCalendario([]);
+</script>

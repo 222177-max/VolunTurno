@@ -1,0 +1,70 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimodal.astro';
+---
+
+<Layout>
+  <main
+    class="flex min-h-dvh items-center justify-center
+           bg-slate-100 p-6 text-slate-900
+           dark:bg-slate-950 dark:text-white"
+  >
+    <section
+      class="w-full max-w-lg rounded-2xl bg-white p-7
+             shadow-lg dark:bg-slate-900"
+      aria-labelledby="titulo-prueba"
+    >
+      <div class="mb-5 flex items-center gap-3">
+        <div
+          class="flex h-12 w-12 items-center justify-center
+                 rounded-xl bg-emerald-100 text-2xl"
+          aria-hidden="true"
+        >
+          🌱
+        </div>
+
+        <div>
+          <h1 id="titulo-prueba" class="text-xl font-bold">
+            VolunTurno
+          </h1>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            Prueba de redundancia sensorial
+          </p>
+        </div>
+      </div>
+
+      <p class="mb-6 text-sm leading-relaxed">
+        Presiona el botón para probar la respuesta visual,
+        auditiva y táctil del componente.
+      </p>
+
+      <BotonConfirmacionMultimodal
+        id="prueba-confirmacion"
+        texto="Confirmar acción"
+      />
+
+      <div
+        class="mt-6 rounded-lg bg-slate-100 p-4
+               dark:bg-slate-800"
+      >
+        <h2 class="text-sm font-bold">Canales sensoriales</h2>
+
+        <ul class="mt-3 space-y-2 text-sm">
+          <li>✓ Visual: animación y mensaje</li>
+          <li>✓ Auditivo: sonido breve de éxito</li>
+          <li>✓ Táctil: vibración si el dispositivo es compatible</li>
+        </ul>
+      </div>
+
+      <a
+        href="/dashboard"
+        class="mt-6 inline-block text-sm font-semibold
+               text-emerald-700 underline
+               dark:text-emerald-300"
+      >
+        ← Volver al panel principal
+      </a>
+    </section>
+  </main>
+</Layout>
