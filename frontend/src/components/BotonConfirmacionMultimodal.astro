@@ -1,271 +1,212 @@
-
 ---
 interface Props {
   texto?: string;
   id?: string;
   tipo?: 'button' | 'submit';
 }
-
-const {
-  texto = 'Confirmar acción',
-  id = 'boton-multimodal',
-  tipo = 'button'
-} = Astro.props;
+const { texto = 'Confirmar acción', id = 'boton-multimodal', tipo = 'button' } = Astro.props;
 ---
 
 <div class="multimodal-contenedor" data-multimodal>
   <div class="multimodal-preferencias">
     <label class="multimodal-opcion">
-      <input type="checkbox" data-sonido checked />
+      <input type="checkbox" data-sonido />
       Activar sonido
     </label>
-
     <label class="multimodal-opcion">
       <input type="checkbox" data-vibracion checked />
       Activar vibración
     </label>
   </div>
-
-  <button
-  id={id}
-  type={tipo}
-  class="multimodal-boton"
-  data-boton
-  data-demo={tipo === 'button' && id === 'prueba-confirmacion' ? 'true' : 'false'}
-  data-texto={texto}
->
+  <button id={id} type={tipo} class="multimodal-boton" data-boton data-texto={texto}>
     <span data-icono aria-hidden="true">✓</span>
     <span data-etiqueta>{texto}</span>
   </button>
-
-  <p
-    class="multimodal-mensaje"
-    data-mensaje
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-  ></p>
+  <p class="multimodal-mensaje" data-mensaje role="status" aria-live="polite" aria-atomic="true"></p>
 </div>
 
 <style>
-  .multimodal-contenedor {
-    display: grid;
-    gap: 12px;
-  }
-
-  .multimodal-preferencias {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .multimodal-opcion {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  .multimodal-opcion input {
-    width: 16px;
-    height: 16px;
-    accent-color: #047857;
-  }
-
-  .multimodal-boton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 44px;
-    width: 100%;
-    border: 0;
-    border-radius: 8px;
-    padding: 10px 18px;
-    background: #047857;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      transform 120ms ease,
-      background-color 120ms ease;
-  }
-
-  .multimodal-boton:hover {
-    background: #065f46;
-  }
-
-  .multimodal-boton:active {
-    transform: scale(0.97);
-  }
-
-  .multimodal-boton:focus-visible {
-    outline: 3px solid #10b981;
-    outline-offset: 3px;
-  }
-
-  .multimodal-boton:disabled {
-    cursor: wait;
-    opacity: 0.75;
-  }
-
-  .multimodal-boton.exito {
-    background: #065f46;
-  }
-
-  .multimodal-mensaje {
-    min-height: 20px;
-    margin: 0;
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .multimodal-boton {
-      transition: none;
-    }
-
-    .multimodal-boton:active {
-      transform: none;
-    }
-  }
+  .multimodal-contenedor { display: grid; gap: 12px; }
+  .multimodal-preferencias { display: flex; flex-wrap: wrap; gap: 16px; }
+  .multimodal-opcion { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+  .multimodal-opcion input { width: 16px; height: 16px; accent-color: #047857; }
+  .multimodal-boton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; width: 100%; border: 0; border-radius: 8px; padding: 10px 18px; background: #047857; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 120ms ease, background-color 120ms ease; }
+  .multimodal-boton:hover { background: #065f46; }
+  .multimodal-boton:active { transform: scale(0.97); }
+  .multimodal-boton:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
+  .multimodal-boton:disabled { cursor: wait; opacity: 0.75; }
+  .multimodal-boton.exito { background: #065f46; }
+  .multimodal-boton.error { background: #b91c1c; }
+  .multimodal-boton.cancelacion { background: #475569; }
+  .multimodal-boton.progreso { background: #1d4ed8; }
+  .multimodal-mensaje { min-height: 20px; margin: 0; font-size: 13px; font-weight: 500; }
+  @media (prefers-reduced-motion: reduce) { .multimodal-boton { transition: none; } .multimodal-boton:active { transform: none; } }
 </style>
 
 <script>
-  // Cada componente controla sus propios elementos.
-  const componentes = document.querySelectorAll<HTMLElement>(
-    '[data-multimodal]'
-  );
+  type Estado = 'exito' | 'error' | 'cancelacion' | 'progreso';
+  interface Firma {
+    tonos: number[];
+    duracion: number;
+    pausa: number;
+    tipo: OscillatorType;
+    intensidad: number;
+    vibracion: number[];
+    mensaje: string;
+    etiqueta: string;
+    icono: string;
+  }
 
-  // Contexto de audio: se crea únicamente cuando el usuario
-  // interactúa, respetando las restricciones del navegador.
+  // Todas las firmas duran menos de 2 segundos.
+  const firmas: Record<Estado, Firma> = {
+    exito: {
+      tonos: [523.25, 659.25, 783.99], duracion: 0.15, pausa: 0.035,
+      tipo: 'sine', intensidad: 0.11, vibracion: [110],
+      mensaje: 'La acción se completó correctamente.', etiqueta: 'Acción confirmada', icono: '✓'
+    },
+    error: {
+      tonos: [330, 247, 165], duracion: 0.19, pausa: 0.065,
+      tipo: 'sawtooth', intensidad: 0.11, vibracion: [220, 90, 220, 90, 240],
+      mensaje: 'No se pudo completar la operación.', etiqueta: 'Error en la operación', icono: '!'
+    },
+    
+
+cancelacion: {
+  // Tres notas descendentes, suaves y sin disonancia.
+  tonos: [587, 440, 349],
+
+  // Duración de cada nota y pausa entre ellas.
+  duracion: 0.22,
+  pausa: 0.06,
+
+  // Sonido limpio, distinto del error.
+  tipo: 'sine',
+
+  // Volumen perceptible, sin resultar agresivo.
+  intensidad: 0.105,
+
+  // Dos vibraciones cortas y separadas.
+  vibracion: [100, 160, 100],
+
+  mensaje: 'La operación fue cancelada.',
+  etiqueta: 'Operación cancelada',
+  icono: '×'
+},
+
+
+    progreso: {
+      tonos: [784, 784, 784, 784], duracion: 0.055, pausa: 0.105,
+      tipo: 'triangle', intensidad: 0.055, vibracion: [35, 170, 35, 170, 35, 170, 35],
+      mensaje: 'Procesando la solicitud...', etiqueta: 'Procesando...', icono: '…'
+    }
+  };
+
   let contextoAudio: AudioContext | null = null;
+  let siguienteSonido = 0;
 
-  async function reproducirSonido() {
-    const AudioContextDisponible = window.AudioContext;
-
-    if (!AudioContextDisponible) return;
-
+  function prepararAudio() {
+    if (!window.AudioContext) return;
     try {
-      contextoAudio ??= new AudioContextDisponible();
-
-      if (contextoAudio.state === 'suspended') {
-        await contextoAudio.resume();
-      }
-
-      const inicio = contextoAudio.currentTime;
-
-      // Dos tonos breves de confirmación.
-      const tonos = [
-        { frecuencia: 660, tiempo: 0 },
-        { frecuencia: 880, tiempo: 0.13 }
-      ];
-
-      for (const tono of tonos) {
-        const oscilador = contextoAudio.createOscillator();
-        const volumen = contextoAudio.createGain();
-
-        oscilador.type = 'sine';
-        oscilador.frequency.value = tono.frecuencia;
-
-        const comienza = inicio + tono.tiempo;
-        const termina = comienza + 0.12;
-
-        volumen.gain.setValueAtTime(0.0001, comienza);
-        volumen.gain.exponentialRampToValueAtTime(
-          0.08,
-          comienza + 0.015
-        );
-        volumen.gain.exponentialRampToValueAtTime(
-          0.0001,
-          termina
-        );
-
-        oscilador.connect(volumen);
-        volumen.connect(contextoAudio.destination);
-
-        oscilador.start(comienza);
-        oscilador.stop(termina);
-      }
-    } catch (error) {
-      console.warn('Audio no disponible:', error);
-    }
+      contextoAudio ??= new AudioContext();
+      if (contextoAudio.state === 'suspended') void contextoAudio.resume().catch(console.warn);
+    } catch (error) { console.warn('No se pudo preparar el audio:', error); }
   }
 
-  function vibrar() {
-    if ('vibrate' in navigator) {
-      navigator.vibrate([70, 40, 70]);
-    }
+  function reproducirSonido(estado: Estado) {
+    prepararAudio();
+    const contexto = contextoAudio;
+    if (!contexto) return;
+    const firma = firmas[estado];
+    // Si la respuesta de MySQL es inmediata, el sonido de éxito se reproduce
+    // después del de progreso en lugar de taparlo.
+    const inicio = Math.max(contexto.currentTime + 0.015, siguienteSonido);
+    firma.tonos.forEach((frecuencia, indice) => {
+      const comienza = inicio + indice * (firma.duracion + firma.pausa);
+      const termina = comienza + firma.duracion;
+      const oscilador = contexto.createOscillator();
+      const ganancia = contexto.createGain();
+      oscilador.type = firma.tipo;
+      oscilador.frequency.setValueAtTime(frecuencia, comienza);
+      ganancia.gain.setValueAtTime(0.0001, comienza);
+      ganancia.gain.linearRampToValueAtTime(firma.intensidad, comienza + 0.012);
+      ganancia.gain.exponentialRampToValueAtTime(0.0001, termina);
+      oscilador.connect(ganancia);
+      ganancia.connect(contexto.destination);
+      oscilador.start(comienza);
+      oscilador.stop(termina);
+    });
+    siguienteSonido = inicio + firma.tonos.length * firma.duracion
+      + (firma.tonos.length - 1) * firma.pausa + 0.09;
   }
 
-  for (const componente of componentes) {
-    const boton = componente.querySelector<HTMLButtonElement>(
-      '[data-boton]'
-    );
+  function vibrar(estado: Estado) {
+    if ('vibrate' in navigator) navigator.vibrate(firmas[estado].vibracion);
+  }
 
-    const etiqueta = componente.querySelector<HTMLElement>(
-      '[data-etiqueta]'
-    );
+  for (const componente of document.querySelectorAll<HTMLElement>('[data-multimodal]')) {
+    const boton = componente.querySelector<HTMLButtonElement>('[data-boton]');
+    const etiqueta = componente.querySelector<HTMLElement>('[data-etiqueta]');
+    const icono = componente.querySelector<HTMLElement>('[data-icono]');
+    const mensaje = componente.querySelector<HTMLElement>('[data-mensaje]');
+    const sonido = componente.querySelector<HTMLInputElement>('[data-sonido]');
+    const vibracion = componente.querySelector<HTMLInputElement>('[data-vibracion]');
+    if (!boton || !etiqueta || !icono || !mensaje) continue;
 
-    const mensaje = componente.querySelector<HTMLElement>(
-      '[data-mensaje]'
-    );
+    const textoOriginal = boton.dataset.texto || 'Confirmar acción';
+    const iconoOriginal = icono.textContent || '✓';
+    try {
+      if (sonido) sonido.checked = localStorage.getItem('volunturno-sonido') === 'true';
+      if (vibracion) vibracion.checked = localStorage.getItem('volunturno-vibracion') !== 'false';
+    } catch { /* El almacenamiento puede estar bloqueado. */ }
 
-    const sonido = componente.querySelector<HTMLInputElement>(
-      '[data-sonido]'
-    );
+    sonido?.addEventListener('change', () => {
+      try { localStorage.setItem('volunturno-sonido', String(sonido.checked)); } catch {}
+      if (sonido.checked) prepararAudio();
+    });
+    vibracion?.addEventListener('change', () => {
+      try { localStorage.setItem('volunturno-vibracion', String(vibracion.checked)); } catch {}
+      if (!vibracion.checked && 'vibrate' in navigator) navigator.vibrate(0);
+    });
 
-    const vibracion = componente.querySelector<HTMLInputElement>(
-      '[data-vibracion]'
-    );
+    // El navegador permite desbloquear el AudioContext durante el clic real.
+    boton.addEventListener('pointerdown', () => { if (sonido?.checked) prepararAudio(); });
+    boton.addEventListener('keydown', (evento) => {
+      if ((evento.key === 'Enter' || evento.key === ' ') && sonido?.checked) prepararAudio();
+    });
+    boton.addEventListener('click', () => { if (sonido?.checked) prepararAudio(); });
 
-    if (!boton || !etiqueta || !mensaje) continue;
-
-    // Exponer una función de confirmación para que otros
-    // módulos puedan utilizarla después de guardar en MySQL.
-    const confirmarExito = () => {
-      boton.classList.add('exito');
-      etiqueta.textContent = 'Acción confirmada ✓';
-      mensaje.textContent = 'La acción se completó correctamente.';
-
-      if (sonido?.checked) {
-        void reproducirSonido();
+    function emitirEstado(estado: Estado, detalle?: string) {
+      const firma = firmas[estado];
+      boton!.classList.remove('exito', 'error', 'cancelacion', 'progreso');
+      boton!.classList.add(estado);
+      etiqueta!.textContent = firma.etiqueta;
+      icono!.textContent = firma.icono;
+      mensaje!.textContent = detalle || firma.mensaje;
+      boton!.setAttribute('aria-busy', estado === 'progreso' ? 'true' : 'false');
+      if (sonido?.checked) reproducirSonido(estado);
+      if (vibracion?.checked) vibrar(estado);
+      if (estado === 'exito') {
+        componente.dispatchEvent(new CustomEvent('multimodal:confirmado', { bubbles: true }));
       }
+    }
 
-      if (vibracion?.checked) {
-        vibrar();
-      }
+    for (const estado of ['exito', 'error', 'cancelacion', 'progreso'] as Estado[]) {
+      componente.addEventListener(`multimodal:${estado}`, (evento) => {
+        const detalle = (evento as CustomEvent<{ mensaje?: string }>).detail;
+        emitirEstado(estado, detalle?.mensaje);
+      });
+    }
 
-      componente.dispatchEvent(
-        new CustomEvent('multimodal:confirmado', {
-          bubbles: true
-        })
-      );
-    };
-
-    // DEMOSTRACIÓN INDEPENDIENTE
-    // En el botón real de Publicar turno no utilizaremos
-    // confirmación automática: esperaremos la respuesta MySQL.
-    // Solo confirmar automáticamente en la página de demostración.
-// En Crear turno, esperar a que MySQL guarde correctamente.
-if (
-  boton.type === 'button' &&
-  boton.dataset.demo === 'true'
-) {
-  boton.addEventListener('click', confirmarExito);
-}
-
-    // Permitir confirmar desde el código de Crear turno.
-    componente.addEventListener('multimodal:exito', confirmarExito);
-
-    // Restaurar el estado inicial.
+    componente.addEventListener('multimodal:preparar', () => {
+      if (sonido?.checked) prepararAudio();
+    });
     componente.addEventListener('multimodal:reiniciar', () => {
-      boton.classList.remove('exito');
-      etiqueta.textContent =
-        boton.dataset.texto || 'Confirmar acción';
+      boton.classList.remove('exito', 'error', 'cancelacion', 'progreso');
+      boton.removeAttribute('aria-busy');
+      etiqueta.textContent = textoOriginal;
+      icono.textContent = iconoOriginal;
       mensaje.textContent = '';
+      if ('vibrate' in navigator) navigator.vibrate(0);
     });
   }
 </script>

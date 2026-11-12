@@ -1,4 +1,3 @@
-
 ---
 import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/AppShell.astro';
@@ -266,6 +265,15 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
               <div class="flex flex-wrap gap-2">
                 <button id="borrador" type="button" class="boton-secundario">
                   Guardar borrador
+
+<button
+  id="cancelar-creacion"
+  type="button"
+  class="boton-secundario"
+>
+  Cancelar creación
+</button>
+
                 </button>
                 <BotonConfirmacionMultimodal
                   id="publicar"
@@ -484,6 +492,16 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
     multimodal?.dispatchEvent(new Event('multimodal:reiniciar'));
   }
 
+  type EstadoMultimodal = 'progreso' | 'exito' | 'error' | 'cancelacion';
+
+  function informarMultimodal(estado: EstadoMultimodal, texto?: string) {
+    multimodal?.dispatchEvent(
+      new CustomEvent(`multimodal:${estado}`, {
+        detail: texto ? { mensaje: texto } : undefined
+      })
+    );
+  }
+
   let paso = 1;
   let autorizado = false;
   let guardando = false;
@@ -584,17 +602,20 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   function validarPaso1() {
     if (!validarCampos([actividad, lugar, fecha, inicio, fin])) {
+      informarMultimodal('error', 'Revisa los campos obligatorios del primer paso.');
       return false;
     }
 
     if (fecha.value < hoyPeru()) {
       mensaje('La fecha no puede estar en el pasado.');
+      informarMultimodal('error', 'La fecha no puede estar en el pasado.');
       fecha.focus();
       return false;
     }
 
     if (fin.value <= inicio.value) {
       mensaje('La hora de fin debe ser posterior a la hora de inicio.');
+      informarMultimodal('error', 'La hora de fin debe ser posterior a la hora de inicio.');
       fin.focus();
       return false;
     }
@@ -603,19 +624,24 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
   }
 
   function validarPaso2() {
-    if (!validarCampos([cupos, funciones])) return false;
+    if (!validarCampos([cupos, funciones])) {
+      informarMultimodal('error', 'Revisa los cupos y las funciones del segundo paso.');
+      return false;
+    }
 
     const cantidad = Number(cupos.value);
 
     if (!Number.isInteger(cantidad) ||
         cantidad < 1 || cantidad > 500) {
       mensaje('Los cupos deben ser un entero entre 1 y 500.');
+      informarMultimodal('error', 'Los cupos deben ser un entero entre 1 y 500.');
       cupos.focus();
       return false;
     }
 
     if (!responsable.value) {
       mensaje('No se identificó al coordinador autenticado.');
+      informarMultimodal('error', 'No se identificó al coordinador autenticado.');
       return false;
     }
 
@@ -762,27 +788,31 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       mensaje(
         'Selecciona Datos reales · MySQL para guardar o publicar.'
       );
+      informarMultimodal('error', 'Selecciona Datos reales · MySQL.');
       return;
     }
 
     if (!autorizado) {
       mensaje('Primero debes iniciar sesión como coordinador.');
+      informarMultimodal('error', 'Inicia sesión como coordinador.');
       return;
     }
 
     if (!validarPaso1()) {
       mostrarPaso(1);
-      validarPaso1();
       return;
     }
 
     if (!validarPaso2()) {
       mostrarPaso(2);
-      validarPaso2();
       return;
     }
 
     guardando = true;
+    // La solicitud ya pasó las validaciones y va a enviarse a Express.
+    if (estado === 'publicado') {
+      informarMultimodal('progreso', 'Publicando el turno en MySQL...');
+    }
     publicar.disabled = true;
     borrador.disabled = true;
 
@@ -834,7 +864,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
       // La respuesta exitosa del servidor confirma el guardado.
       if (estado === 'publicado') {
-        multimodal?.dispatchEvent(new Event('multimodal:exito'));
+        informarMultimodal('exito', 'El turno se publicó correctamente en MySQL.');
       }
 
       formulario.hidden = true;
@@ -865,26 +895,35 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       elemento('resultado').focus();
 
     } catch (error) {
-      mensaje(
-        error instanceof Error
-          ? error.message
-          : 'Error inesperado al guardar.'
-      );
+      const descripcion = error instanceof Error
+        ? error.message
+        : 'Error inesperado al guardar.';
+      mensaje(descripcion);
+      if (estado === 'publicado') informarMultimodal('error', descripcion);
 
     } finally {
       guardando = false;
       publicar.disabled = false;
       borrador.disabled = false;
-      textoPublicar('Publicar turno');
+      // El componente multimodal controla la etiqueta del botón
+      // cuando el resultado es éxito o error.
+      if (estado === 'borrador') textoPublicar('Publicar turno');
       borrador.textContent = 'Guardar borrador';
     }
   }
 
-  publicar.addEventListener('click', () => {
-    // Preparar el audio durante el gesto del usuario.
-    multimodal?.dispatchEvent(new Event('multimodal:preparar'));
-    void guardar('publicado');
-  });
+  
+publicar.addEventListener('click', () => {
+  // Prepara el audio durante el clic del usuario.
+  multimodal?.dispatchEvent(
+    new Event('multimodal:preparar')
+  );
+
+  // La función guardar activa progreso al enviar
+  // la solicitud y éxito o error al recibir respuesta.
+  void guardar('publicado');
+});
+
   borrador.addEventListener('click', () => guardar('borrador'));
 
   elemento('crear-otro').addEventListener('click', () => {
@@ -944,4 +983,33 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   mostrarPaso(1);
   resumen();
+
+const cancelarCreacion = document.getElementById(
+  'cancelar-creacion'
+) as HTMLButtonElement | null;
+
+cancelarCreacion?.addEventListener('click', () => {
+  if (guardando) return;
+
+  // El usuario confirma que desea abandonar el formulario.
+  const confirmado = window.confirm(
+    '¿Deseas cancelar la creación del turno? ' +
+    'Los datos que no guardaste se perderán.'
+  );
+
+  if (!confirmado) return;
+
+  // Reproducir firma suave y descendente.
+  informarMultimodal(
+    'cancelacion',
+    'Creación del turno cancelada. No se guardaron cambios.'
+  );
+
+  // Permitir que el usuario perciba la confirmación
+  // antes de salir del formulario.
+  window.setTimeout(() => {
+    window.location.assign('/calendario');
+  }, 900);
+});
+
 </script>

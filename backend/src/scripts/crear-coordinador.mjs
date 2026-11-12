@@ -85,6 +85,6 @@ async function crearCoordinador() {
     rl.close();
     await db.end();
   }
-}
+}Select-String -Path .\backend\src\scripts\crear-coordinador.mjs -Pattern 'password|contrasena|contraseña|process.env' | Select-Object -ExpandProperty LineNumberq
 
 crearCoordinador();
