@@ -1,0 +1,504 @@
+---
+// Actividad 16 — basado en la versión estable enviada por el usuario.
+// Los campos pertenecen a crear-turno.astro: no se duplican ni se modifica MySQL.
+// Reconocimiento puntual (no continuo) para evitar sesiones de escucha prolongadas.
+---
+
+<section aria-labelledby="voz-titulo" class="w-full min-w-0 rounded-xl border border-emerald-300 bg-emerald-50/70 p-4 shadow-sm dark:border-emerald-800 dark:bg-slate-800/80">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h3 id="voz-titulo" class="text-base font-bold text-emerald-800 dark:text-emerald-300">
+      🎙️ Entrada accesible: voz o teclado
+    </h3>
+    <p class="text-xs text-slate-600 dark:text-slate-300">Actividad práctica 16</p>
+  </div>
+
+  <div class="mt-3 flex flex-wrap items-center gap-2">
+    <label for="voz-destino" class="text-sm text-slate-700 dark:text-slate-200">Dictar en:</label>
+    <select id="voz-destino" class="min-h-10 max-w-full rounded-lg border border-slate-400 bg-white px-2 py-2 text-sm text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:bg-slate-900 dark:text-white">
+      <option value="comandos">Comandos</option>
+      <option value="actividad">Actividad (frase libre)</option>
+      <option value="lugar">Lugar (frase libre)</option>
+      <option value="funciones">Funciones (frase libre)</option>
+      <option value="cupos">Cupos</option>
+      <option value="horario">Horario</option>
+    </select>
+
+    <button id="voz-iniciar" type="button" class="min-h-10 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 disabled:opacity-60">
+      🎙️ Hablar
+    </button>
+    <button id="voz-teclado" type="button" class="min-h-10 rounded-lg border border-slate-400 px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-white dark:hover:bg-slate-700">
+      ⌨️ Escribir
+    </button>
+  </div>
+
+  <p id="voz-estado" role="status" aria-live="polite" class="mt-2 w-full text-sm text-slate-700 dark:text-slate-200">
+    Selecciona un campo y pulsa Hablar, o escribe directamente.
+  </p>
+
+  <div class="mt-3 flex flex-wrap items-center gap-2">
+    <span class="text-xs text-slate-600 dark:text-slate-300">Horario rápido:</span>
+    <button id="horario-manana" type="button" aria-pressed="false" class="min-h-9 rounded-full border border-emerald-600 px-3 py-1 text-xs font-semibold text-slate-900 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-white dark:hover:bg-slate-700">
+      ☀️ Mañana 08:00–13:00
+    </button>
+    <button id="horario-tarde" type="button" aria-pressed="false" class="min-h-9 rounded-full border border-emerald-600 px-3 py-1 text-xs font-semibold text-slate-900 hover:bg-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-white dark:hover:bg-slate-700">
+      🌤️ Tarde 14:00–18:00
+    </button>
+  </div>
+
+  <!-- Pruebas en este mismo recuadro; se despliegan cuando el estudiante lo necesita. -->
+  <details id="voz-ayuda" class="mt-3 w-full text-sm text-slate-700 dark:text-slate-200">
+    <summary class="w-fit cursor-pointer rounded py-1 font-semibold text-emerald-800 underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-emerald-300">
+      Pruebas de accesibilidad y ejemplos de comandos
+    </summary>
+    <div class="mt-2 space-y-2 rounded-lg border border-emerald-200 bg-white/80 p-3 dark:border-slate-600 dark:bg-slate-900/60">
+      <p><strong>Frases largas:</strong> elige «Actividad (frase libre)», pulsa Hablar y di «recolección solidaria de alimentos para familias». Se copiará la frase reconocida completa.</p>
+      <p><strong>Comandos:</strong> «actividad renovación social de espacios públicos», «lugar Plaza de Armas de Abancay», «funciones orientar voluntarios», «cupos 25», «fecha 20 de noviembre de 2026».</p>
+      <p><strong>Horas:</strong> «hora 8» → 08:00–13:00; «hora 9 de la mañana» → 09:00–13:00; «hora 8 termina 10» → 08:00–10:00; «hora 14» → 14:00–18:00; «hora 14 termina 18» → 14:00–18:00.</p>
+      <p>También puedes decir «mañana», «tarde», «inicio ocho y media», «fin doce» o «ayuda». Si falla el micrófono, se conserva todo lo escrito.</p>
+      <button id="voz-simular-fallo" type="button" class="min-h-9 rounded-lg border border-amber-600 px-3 py-2 font-semibold text-amber-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 dark:text-amber-200">
+        Simular fallo del micrófono
+      </button>
+    </div>
+  </details>
+
+  <p id="voz-error" hidden role="alert" class="mt-2 rounded-lg bg-amber-100 p-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-100"></p>
+
+  <dialog id="voz-conflicto" aria-labelledby="voz-conflicto-titulo" aria-describedby="voz-conflicto-detalle" class="w-[min(92vw,440px)] rounded-xl border border-slate-300 bg-white p-5 text-slate-900 shadow-xl backdrop:bg-slate-900/60 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+    <h4 id="voz-conflicto-titulo" class="text-lg font-bold">Confirma el horario</h4>
+    <p id="voz-conflicto-detalle" class="mt-2 text-sm"></p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button id="voz-conservar" type="button" class="min-h-10 rounded-lg border border-slate-400 px-3 py-2 font-semibold">Conservar actual</button>
+      <button id="voz-cambiar" type="button" class="min-h-10 rounded-lg bg-emerald-700 px-3 py-2 font-semibold text-white">Aplicar nuevo</button>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  // Inicialización ligera. Ningún micrófono, bucle ni audio se inicia al cargar la página.
+  const buscar = (id: string) => document.getElementById(id);
+  const campos = {
+    actividad: buscar('actividad') as HTMLInputElement | null,
+    lugar: buscar('lugar') as HTMLInputElement | null,
+    funciones: buscar('funciones') as HTMLTextAreaElement | null,
+    cupos: buscar('cupos') as HTMLInputElement | null,
+    fecha: buscar('fecha') as HTMLInputElement | null,
+    inicio: buscar('inicio') as HTMLInputElement | null,
+    fin: buscar('fin') as HTMLInputElement | null,
+  };
+  const iniciar = buscar('voz-iniciar') as HTMLButtonElement | null;
+  const teclado = buscar('voz-teclado') as HTMLButtonElement | null;
+  const simular = buscar('voz-simular-fallo') as HTMLButtonElement | null;
+  const selector = buscar('voz-destino') as HTMLSelectElement | null;
+  const manana = buscar('horario-manana') as HTMLButtonElement | null;
+  const tarde = buscar('horario-tarde') as HTMLButtonElement | null;
+  const estado = buscar('voz-estado') as HTMLElement | null;
+  const error = buscar('voz-error') as HTMLElement | null;
+  const ayuda = buscar('voz-ayuda') as HTMLDetailsElement | null;
+  const dialogo = buscar('voz-conflicto') as HTMLDialogElement | null;
+  const detalle = buscar('voz-conflicto-detalle') as HTMLElement | null;
+  const conservar = buscar('voz-conservar') as HTMLButtonElement | null;
+  const cambiar = buscar('voz-cambiar') as HTMLButtonElement | null;
+
+  type NombreCampo = 'actividad' | 'lugar' | 'funciones' | 'cupos';
+  type Destino = NombreCampo | 'horario' | 'comandos';
+  type Origen = 'voz' | 'clic';
+  type Horario = { inicio: string; fin: string; origen: Origen; momento: number };
+  type ResultadoVoz = ArrayLike<{ transcript: string }>;
+  type EventoVoz = { results: ArrayLike<ResultadoVoz> };
+  type Reconocimiento = {
+    lang: string;
+    continuous: boolean;
+    interimResults: boolean;
+    onstart: (() => void) | null;
+    onresult: ((evento: EventoVoz) => void) | null;
+    onerror: ((evento: { error: string }) => void) | null;
+    onend: (() => void) | null;
+    start: () => void;
+    abort: () => void;
+  };
+  type ConstructorReconocimiento = new () => Reconocimiento;
+  type VentanaVoz = Window & {
+    SpeechRecognition?: ConstructorReconocimiento;
+    webkitSpeechRecognition?: ConstructorReconocimiento;
+    webkitAudioContext?: typeof AudioContext;
+  };
+
+  let reconocimiento: Reconocimiento | null = null;
+  let cancelado = false;
+  let ultimoHorario: Horario | null = null;
+  let pendiente: Horario | null = null;
+  let contextoAudio: AudioContext | null = null;
+  const ventanaConflictoMs = 6000;
+
+  const normalizar = (texto: string) => texto.toLocaleLowerCase('es-PE')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+  function informar(texto: string, esError = false) {
+    if (estado) estado.textContent = texto;
+    if (error) {
+      error.hidden = !esError;
+      error.textContent = esError ? texto : '';
+    }
+  }
+
+  function prepararSonido() {
+    try {
+      const v = window as VentanaVoz;
+      const Audio = window.AudioContext || v.webkitAudioContext;
+      if (Audio && !contextoAudio) contextoAudio = new Audio();
+      if (contextoAudio?.state === 'suspended') void contextoAudio.resume();
+    } catch { /* La confirmación visual sigue funcionando. */ }
+  }
+
+  function confirmar() {
+    try {
+      const ctx = contextoAudio;
+      if (ctx && ctx.state === 'running') {
+        const oscilador = ctx.createOscillator();
+        const ganancia = ctx.createGain();
+        oscilador.type = 'sine';
+        oscilador.frequency.value = 660;
+        ganancia.gain.setValueAtTime(0.025, ctx.currentTime);
+        ganancia.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        oscilador.connect(ganancia);
+        ganancia.connect(ctx.destination);
+        oscilador.start();
+        oscilador.stop(ctx.currentTime + 0.13);
+      }
+      if ('vibrate' in navigator) navigator.vibrate(60);
+    } catch { /* El texto visual siempre queda disponible. */ }
+  }
+
+  function emitirCambio(campo: HTMLInputElement | HTMLTextAreaElement) {
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function escribir(nombre: NombreCampo, texto: string) {
+    const campo = campos[nombre];
+    if (!campo) return;
+    const valor = texto.trim().replace(/[.!?]+$/g, '').trim();
+    if (!valor) {
+      informar('No se entendió ningún contenido. Prueba otra vez o utiliza el teclado.', true);
+      return;
+    }
+    if (nombre === 'cupos') {
+      const cantidad = numeroEspanol(normalizar(valor));
+      if (cantidad === null || cantidad < 1 || cantidad > 500) {
+        informar('Los cupos deben ser un número entre 1 y 500.', true);
+        return;
+      }
+      campo.value = String(cantidad);
+    } else {
+      campo.value = valor.slice(0, campo.maxLength > 0 ? campo.maxLength : 500);
+    }
+    emitirCambio(campo);
+    informar(`${nombre === 'actividad' ? 'Actividad' : nombre === 'lugar' ? 'Lugar' : nombre === 'funciones' ? 'Funciones' : 'Cupos'}: ${campo.value}`);
+    confirmar();
+  }
+
+  const numeros: Record<string, number> = {
+    cero: 0, un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4,
+    cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
+    once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+    dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19,
+    veinte: 20, veintiuno: 21, veintidos: 22, veintitres: 23,
+    veinticuatro: 24, veinticinco: 25, treinta: 30, cuarenta: 40,
+    cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90,
+    cien: 100
+  };
+  function numeroEspanol(texto: string): number | null {
+    const normal = normalizar(texto);
+    const digito = normal.match(/^\d{1,3}$/);
+    if (digito) return Number(digito[0]);
+    if (normal in numeros) return numeros[normal];
+    const junto = normal.match(/^(veinti|treinta y |cuarenta y |cincuenta y )(\w+)$/);
+    if (junto && junto[2] in numeros) {
+      const base = junto[1] === 'veinti' ? 20 : junto[1] === 'treinta y ' ? 30 : junto[1] === 'cuarenta y ' ? 40 : 50;
+      return base + numeros[junto[2]];
+    }
+    return null;
+  }
+
+  function horaMinutos(frase: string, inicioReferencia?: number): number | null {
+    const limpio = normalizar(frase).replace(/^(?:(?:a|desde|hasta|en)\s+)?(?:las?\s+)?/, '').trim();
+    const reloj = limpio.match(/^(\d{1,2}):(\d{2})/);
+    const palabras = limpio.match(/^(\d{1,2}|[a-z]+)(?:\s+y\s+(media|cuarto))?/);
+    if (!reloj && !palabras) return null;
+    const hora = reloj ? Number(reloj[1]) : numeroEspanol(palabras![1]);
+    const minuto = reloj ? Number(reloj[2]) : palabras?.[2] === 'media' ? 30 : palabras?.[2] === 'cuarto' ? 15 : 0;
+    if (hora === null || minuto > 59 || hora > 23) return null;
+    let h = hora;
+    if (/\b(?:de|por) la tarde\b|\bde la noche\b|\bp\.?\s*m\.?\b/.test(limpio) && h >= 1 && h < 12) h += 12;
+    if (/\b(?:de|por) la manana\b|\bde la madrugada\b|\ba\.?\s*m\.?\b/.test(limpio) && h === 12) h = 0;
+    // «hora 8 termina 10» es matutino; «hora 20 termina 10» equivale a 22:00.
+    if (inicioReferencia !== undefined && h <= inicioReferencia / 60 && h <= 11 &&
+        !/\bmanana\b|\bmadrugada\b/.test(limpio)) {
+      const sugerido = h + 12;
+      if (sugerido * 60 > inicioReferencia) h = sugerido;
+    }
+    return h * 60 + minuto;
+  }
+
+  function textoHora(minutos: number) {
+    return `${String(Math.floor(minutos / 60)).padStart(2, '0')}:${String(minutos % 60).padStart(2, '0')}`;
+  }
+  function finAutomatico(minutos: number): number | null {
+    if (minutos >= 360 && minutos < 780) return 780; // Mañana → 13:00
+    if (minutos >= 780 && minutos < 1080) return 1080; // Tarde → 18:00
+    if (minutos >= 1080 && minutos + 120 < 1440) return minutos + 120;
+    return null;
+  }
+  function marcarHorario() {
+    const ini = campos.inicio?.value;
+    const fin = campos.fin?.value;
+    manana?.setAttribute('aria-pressed', String(ini === '08:00' && fin === '13:00'));
+    tarde?.setAttribute('aria-pressed', String(ini === '14:00' && fin === '18:00'));
+  }
+  function aplicarHorario(horario: Horario) {
+    if (!campos.inicio || !campos.fin) return;
+    campos.inicio.value = horario.inicio;
+    campos.fin.value = horario.fin;
+    // Actualizar ambos ANTES de enviar eventos al formulario original.
+    emitirCambio(campos.inicio);
+    emitirCambio(campos.fin);
+    ultimoHorario = horario;
+    marcarHorario();
+    informar(`Horario ${horario.inicio}–${horario.fin} seleccionado mediante ${horario.origen === 'voz' ? 'voz' : 'clic'}.`);
+    confirmar();
+  }
+  function proponerHorario(inicio: string, fin: string, origen: Origen) {
+    const propuesta: Horario = { inicio, fin, origen, momento: Date.now() };
+    if (pendiente) return;
+    if (ultimoHorario && ultimoHorario.origen !== origen &&
+        (ultimoHorario.inicio !== inicio || ultimoHorario.fin !== fin) &&
+        Date.now() - ultimoHorario.momento <= ventanaConflictoMs) {
+      pendiente = propuesta;
+      if (detalle) detalle.textContent =
+        `Horario anterior: ${ultimoHorario.inicio}–${ultimoHorario.fin}. Nueva orden: ${inicio}–${fin}. ¿Cuál prefieres?`;
+      informar('Hay dos órdenes contradictorias. Confirma el horario.');
+      if (dialogo && !dialogo.open) dialogo.showModal();
+      conservar?.focus();
+      return;
+    }
+    aplicarHorario(propuesta);
+  }
+  function horarioRapido(opcion: 'manana' | 'tarde', origen: Origen) {
+    proponerHorario(opcion === 'manana' ? '08:00' : '14:00', opcion === 'manana' ? '13:00' : '18:00', origen);
+  }
+  function procesarHorario(texto: string) {
+    const limpio = normalizar(texto).replace(/^\s*(?:hora\s+(?:de\s+)?inicio|inicio|hora)\s*(?:(?:es|a las?)\s+)?/, '');
+    if (/^(?:seleccionar\s+)?(?:manana|tarde)$/.test(limpio)) {
+      horarioRapido(limpio.endsWith('manana') ? 'manana' : 'tarde', 'voz');
+      return;
+    }
+    const partes = limpio.split(/\s+(?:termina|finaliza|hasta|fin)\s*(?:a\s+las?\s+)?/);
+    if (partes.length > 2 || partes.some(p => !p.trim())) {
+      informar('No entendí el horario. Prueba «hora 8 termina 10».', true);
+      return;
+    }
+    const inicio = horaMinutos(partes[0]);
+    const fin = inicio === null ? null : partes.length === 2
+      ? horaMinutos(partes[1], inicio)
+      : finAutomatico(inicio);
+    if (inicio === null || fin === null || fin <= inicio || fin >= 1440) {
+      informar('Horario inválido. Usa «hora 8», «hora 14» o «hora 8 termina 10».', true);
+      return;
+    }
+    proponerHorario(textoHora(inicio), textoHora(fin), 'voz');
+    if (partes.length === 1 && !pendiente) {
+      informar(`Inicio ${textoHora(inicio)}; fin automático ${textoHora(fin)}. Puedes editarlo.`);
+    }
+  }
+  function cambiarSoloFin(texto: string) {
+    const ini = campos.inicio?.value;
+    if (!ini) {
+      informar('Primero define una hora de inicio.', true);
+      return;
+    }
+    const comienzo = Number(ini.slice(0, 2)) * 60 + Number(ini.slice(3, 5));
+    const fin = horaMinutos(texto, comienzo);
+    if (fin === null || fin <= comienzo || fin >= 1440) {
+      informar('La hora final debe ser posterior a la hora de inicio.', true);
+      return;
+    }
+    proponerHorario(ini, textoHora(fin), 'voz');
+  }
+  function establecerFecha(texto: string) {
+    const meses: Record<string, number> = {
+      enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6,
+      julio: 7, agosto: 8, septiembre: 9, setiembre: 9, octubre: 10,
+      noviembre: 11, diciembre: 12
+    };
+    const normal = normalizar(texto);
+    const match = normal.match(/^(\d{1,2})\s+(?:de\s+)?([a-z]+)(?:\s+de\s+(\d{4}))?$/);
+    if (!match || !(match[2] in meses)) {
+      informar('Fecha no reconocida. Di «fecha 20 de noviembre de 2026».', true);
+      return;
+    }
+    const dia = Number(match[1]);
+    const mes = meses[match[2]];
+    const anio = Number(match[3] || new Date().getFullYear());
+    const fecha = new Date(Date.UTC(anio, mes - 1, dia));
+    if (fecha.getUTCDate() !== dia || fecha.getUTCMonth() !== mes - 1 || !campos.fecha) {
+      informar('La fecha indicada no es válida.', true);
+      return;
+    }
+    campos.fecha.value = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    emitirCambio(campos.fecha);
+    informar(`Fecha establecida: ${dia}/${mes}/${anio}`);
+    confirmar();
+  }
+
+  function procesarOrden(transcripcion: string, destino: Destino) {
+    const texto = transcripcion.trim().replace(/[.!?]+$/g, '');
+    if (!texto) {
+      informar('No se reconoció voz. Puedes intentarlo de nuevo o escribir.', true);
+      return;
+    }
+    const sinPrefijo = (valor: string, nombre: NombreCampo) => {
+      const prefijos: Record<NombreCampo, RegExp> = {
+        actividad: /^(?:seleccionar\s+|poner\s+|dictar\s+|escribir\s+)?(?:la\s+)?actividad\s*(?:(?:es|sera|será)\s+|:\s*)?/i,
+        lugar: /^(?:poner\s+|dictar\s+|escribir\s+)?(?:el\s+)?(?:lugar|ubicaci[oó]n)\s*(?:(?:es|sera|será)\s+|:\s*)?/i,
+        funciones: /^(?:poner\s+|dictar\s+|escribir\s+)?(?:las\s+)?(?:funciones|tareas|habilidades)\s*(?:(?:son|es)\s+|:\s*)?/i,
+        cupos: /^(?:poner\s+|dictar\s+|escribir\s+)?(?:los\s+)?(?:cupos|voluntarios)\s*(?:(?:son|es)\s+|:\s*)?/i
+      };
+      return valor.replace(prefijos[nombre], '').trim();
+    };
+    if (destino === 'actividad' || destino === 'lugar' || destino === 'funciones' || destino === 'cupos') {
+      escribir(destino, sinPrefijo(texto, destino));
+      return;
+    }
+    if (destino === 'horario') {
+      const n = normalizar(texto);
+      if (/^(?:seleccionar\s+)?(?:horario\s+(?:de\s+)?)?(?:manana|tarde)$/.test(n)) {
+        horarioRapido(n.endsWith('manana') ? 'manana' : 'tarde', 'voz');
+      } else procesarHorario(texto);
+      return;
+    }
+
+    // Comandos: las etiquetas se comprueban antes del horario para no confundir
+    // «actividad para mañana» con «seleccionar mañana».
+    const limpio = texto.replace(/^(?:quiero\s+)?(?:poner|escribir|dictar|agregar|seleccionar|registrar)\s+(?:la\s+|el\s+|los\s+|las\s+)?/i, '');
+    const pares: Array<[NombreCampo, RegExp]> = [
+      ['actividad', /^(?:la\s+)?actividad\s*(?:(?:es|sera|será)\s+|:\s*)?(.+)$/i],
+      ['lugar', /^(?:el\s+)?(?:lugar|ubicaci[oó]n)\s*(?:(?:es|sera|será)\s+|:\s*)?(.+)$/i],
+      ['funciones', /^(?:las\s+)?(?:funciones|tareas|habilidades)\s*(?:(?:son|es)\s+|:\s*)?(.+)$/i],
+      ['cupos', /^(?:los\s+)?(?:cupos|voluntarios)\s*(?:(?:son|es)\s+|:\s*)?(.+)$/i]
+    ];
+    for (const [nombre, regex] of pares) {
+      const match = limpio.match(regex);
+      if (match) { escribir(nombre, match[1]); return; }
+    }
+    const ordenFecha = limpio.match(/^(?:fecha|d[ií]a)\s*(?:(?:es|sera|será)\s+|:\s*)?(.+)$/i);
+    if (ordenFecha) { establecerFecha(ordenFecha[1]); return; }
+    const ordenFin = limpio.match(/^(?:fin|hora\s+(?:de\s+)?fin)\s*(?:(?:es|a las?)\s+|:\s*)?(.+)$/i);
+    if (ordenFin) { cambiarSoloFin(ordenFin[1]); return; }
+    const ordenHora = limpio.match(/^(?:hora\s+(?:de\s+)?inicio|hora|inicio)\s*(?:(?:es|a las?)\s+|:\s*)?(.+)$/i);
+    if (ordenHora) { procesarHorario(ordenHora[1]); return; }
+    const n = normalizar(limpio);
+    if (/^(?:horario\s+(?:de\s+)?)?(?:manana|tarde)$/.test(n)) {
+      horarioRapido(n.endsWith('manana') ? 'manana' : 'tarde', 'voz');
+    } else if (n === 'ayuda' || n === 'mostrar ayuda') {
+      if (ayuda) ayuda.open = true;
+      informar('Se mostraron los ejemplos de voz.');
+    } else {
+      informar(`No entendí «${texto}». Prueba «actividad ...», «lugar ...» o «hora 8 termina 10».`, true);
+    }
+  }
+
+  function detenerReconocimiento() {
+    cancelado = true;
+    try { reconocimiento?.abort(); } catch { /* Sin sesión activa. */ }
+    reconocimiento = null;
+    if (iniciar) { iniciar.disabled = false; iniciar.textContent = '🎙️ Hablar'; }
+  }
+  function usarTeclado(mensaje: string, fallo = false) {
+    detenerReconocimiento();
+    informar(mensaje, fallo);
+    const d = selector?.value as Destino | undefined;
+    const foco = d === 'horario' ? campos.inicio : d === 'comandos' ? campos.actividad : d ? campos[d] : campos.actividad;
+    foco?.focus();
+  }
+  teclado?.addEventListener('click', () => usarTeclado('Modo teclado: los datos ingresados se conservaron.'));
+  simular?.addEventListener('click', () => usarTeclado('Micrófono falló (simulación). Continúa escribiendo, no se borraron datos.', true));
+  manana?.addEventListener('click', () => { prepararSonido(); horarioRapido('manana', 'clic'); });
+  tarde?.addEventListener('click', () => { prepararSonido(); horarioRapido('tarde', 'clic'); });
+  conservar?.addEventListener('click', () => {
+    pendiente = null;
+    dialogo?.close();
+    informar('Se conservó el horario anterior.');
+    confirmar();
+  });
+  cambiar?.addEventListener('click', () => {
+    const propuesta = pendiente;
+    pendiente = null;
+    dialogo?.close();
+    if (propuesta) aplicarHorario(propuesta);
+  });
+  dialogo?.addEventListener('cancel', () => {
+    pendiente = null;
+    informar('Se conservó el horario anterior.');
+  });
+  [campos.inicio, campos.fin].forEach(campo => campo?.addEventListener('input', evento => {
+    marcarHorario();
+    if (evento.isTrusted) ultimoHorario = null;
+  }));
+
+  iniciar?.addEventListener('click', () => {
+    // Conserva la estrategia de la versión que sí funcionaba: una sola orden.
+    prepararSonido();
+    const v = window as VentanaVoz;
+    const Constructor = v.SpeechRecognition || v.webkitSpeechRecognition;
+    if (!Constructor) {
+      usarTeclado('Este navegador no admite el reconocimiento de voz. Usa el teclado.', true);
+      return;
+    }
+    if (reconocimiento) return;
+    cancelado = false;
+    const destinoElegido = (selector?.value || 'comandos') as Destino;
+    let transcripcion = '';
+    const sesion = new Constructor();
+    reconocimiento = sesion;
+    sesion.lang = 'es-PE';
+    sesion.continuous = false;       // No mantiene escuchas prolongadas.
+    sesion.interimResults = false;   // Se procesa una frase completa reconocida.
+    if (iniciar) { iniciar.disabled = true; iniciar.textContent = '🎙️ Escuchando…'; }
+    informar(destinoElegido === 'comandos'
+      ? 'Escuchando. Di «actividad ...», «lugar ...», «hora 8 termina 10» o «mañana».'
+      : `Escuchando ${destinoElegido}. Di una frase seguida, sin pausas prolongadas.`);
+    sesion.onstart = () => { /* Indicador ya activado en el clic. */ };
+    sesion.onresult = (evento: EventoVoz) => {
+      if (reconocimiento !== sesion || cancelado) return;
+      const frases: string[] = [];
+      for (let i = 0; i < evento.results.length; i++) {
+        const frase = evento.results[i]?.[0]?.transcript?.trim();
+        if (frase) frases.push(frase);
+      }
+      transcripcion = frases.join(' ');
+      if (transcripcion) procesarOrden(transcripcion, destinoElegido);
+    };
+    sesion.onerror = (evento: { error: string }) => {
+      if (reconocimiento !== sesion || cancelado) return;
+      informar(`Error de voz (${evento.error}). Continúa con el teclado sin perder datos.`, true);
+      const foco = destinoElegido === 'horario' ? campos.inicio
+        : destinoElegido === 'comandos' ? campos.actividad : campos[destinoElegido];
+      foco?.focus();
+    };
+    sesion.onend = () => {
+      if (reconocimiento !== sesion) return;
+      reconocimiento = null;
+      if (iniciar) { iniciar.disabled = false; iniciar.textContent = '🎙️ Hablar'; }
+      if (!transcripcion && !cancelado && !error?.textContent) {
+        informar('No se detectó voz. Puedes intentar de nuevo o escribir.', true);
+      }
+    };
+    try {
+      sesion.start();
+    } catch {
+      if (reconocimiento === sesion) reconocimiento = null;
+      if (iniciar) { iniciar.disabled = false; iniciar.textContent = '🎙️ Hablar'; }
+      informar('No se pudo iniciar el micrófono. Continúa con el teclado.', true);
+    }
+  });
+</script>

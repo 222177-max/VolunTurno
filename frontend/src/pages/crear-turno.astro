@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import AppShell from '../components/AppShell.astro';
 import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimodal.astro';
+import EntradaAccesibleTurno from '../components/EntradaAccesibleTurno.astro';
 ---
 
 <Layout>
@@ -122,6 +123,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
                 <div>
                   <label for="fin" class="etiqueta">Hora de fin *</label>
                   <input id="fin" class="campo" type="time" required />
+                  <EntradaAccesibleTurno />
                 </div>
               </div>
             </div>
@@ -258,31 +260,48 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
             </p>
 
             <div class="mt-4 flex flex-wrap justify-between gap-2">
-              <button id="editar" type="button" class="boton-secundario">
-                ← Editar datos
-              </button>
 
-              <div class="flex flex-wrap gap-2">
-                <button id="borrador" type="button" class="boton-secundario">
-                  Guardar borrador
+  <!-- Botón para regresar a editar -->
+  <button
+    id="editar"
+    type="button"
+    class="boton-secundario"
+  >
+    ← Editar datos
+  </button>
 
-<button
-  id="cancelar-creacion"
-  type="button"
-  class="boton-secundario"
->
-  Cancelar creación
-</button>
+  <!-- Acciones del formulario -->
+  <div class="flex flex-wrap gap-2">
 
-                </button>
-                <BotonConfirmacionMultimodal
-                  id="publicar"
-                  texto="Publicar turno"
-                  tipo="button"
-                />
-              </div>
-            </div>
-          </section>
+    <!-- Guardar borrador -->
+    <button
+      id="borrador"
+      type="button"
+      class="boton-secundario"
+    >
+      Guardar borrador
+    </button>
+
+    <!-- Cancelar creación -->
+    <button
+      id="cancelar-creacion"
+      type="button"
+      class="boton-secundario"
+    >
+      Cancelar creación
+    </button>
+
+    <!-- Publicar turno -->
+    <BotonConfirmacionMultimodal
+      id="publicar"
+      texto="Publicar turno"
+      tipo="button"
+    />
+
+  </div>
+</div>
+
+</section>
 
         </form>
 
