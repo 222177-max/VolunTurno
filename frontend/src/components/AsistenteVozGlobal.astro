@@ -1,0 +1,434 @@
+---
+// Asistente único disponible en todas las páginas que utilizan Layout.astro.
+// El micrófono se inicia SOLAMENTE por acción del usuario.
+const enCrearTurno = Astro.url.pathname.replace(/\/$/, '') === '/crear-turno';
+---
+
+<div id="vg-widget" class="vg-widget" data-voz-global>
+  <section id="vg-panel" class="vg-panel" hidden aria-labelledby="vg-titulo">
+    <div class="vg-encabezado">
+      <div>
+        <h2 id="vg-titulo">Asistente de voz · VolunTurno</h2>
+        <p>Disponible en esta pantalla. También puedes escribir normalmente.</p>
+      </div>
+      <button id="vg-cerrar" class="vg-cerrar" type="button" aria-label="Cerrar asistente de voz">✕</button>
+    </div>
+
+    <div class="vg-opciones">
+      <label for="vg-modo">Cómo quieres hablar</label>
+      <select id="vg-modo">
+        <option value="comandos">Comandos del sistema</option>
+        <option value="dictado">Dictar en el campo seleccionado</option>
+      </select>
+    </div>
+
+    <div class="vg-acciones">
+      <button id="vg-hablar" type="button" class="vg-primario">🎙 Hablar otra vez</button>
+      <button id="vg-teclado" type="button" class="vg-secundario">⌨ Usar teclado</button>
+    </div>
+
+    <p id="vg-estado" class="vg-estado" role="status" aria-live="polite">
+      Pulsa el micrófono y di una instrucción.
+    </p>
+    <p id="vg-error" class="vg-error" hidden role="alert"></p>
+
+    {enCrearTurno && (
+      <fieldset class="vg-horarios">
+        <legend>Horario rápido</legend>
+        <div class="vg-acciones">
+          <button type="button" id="vg-manana" class="vg-secundario">☀ Mañana 08:00–13:00</button>
+          <button type="button" id="vg-tarde" class="vg-secundario">🌤 Tarde 14:00–18:00</button>
+        </div>
+      </fieldset>
+    )}
+
+    <details class="vg-ayuda">
+      <summary>Ejemplos de voz y pruebas</summary>
+      <p><strong>Navegación:</strong> «abrir panel principal», «abrir calendario», «crear turno», «ir al inicio», «cambiar tema».</p>
+      <p><strong>Calendario:</strong> «mes siguiente», «mes anterior», «ir a hoy».</p>
+      <p><strong>Crear turno:</strong> «actividad recolección solidaria de alimentos», «lugar Cerro Verde», «cupos 25», «funciones organizar voluntarios».</p>
+      <p><strong>Horario:</strong> «hora 8», «hora 9 de la mañana», «hora 8 termina 10», «hora 14 termina 18», «mañana», «tarde».</p>
+      <p><strong>Otros:</strong> «fecha 20 de noviembre de 2026», «siguiente paso», «anterior paso», «ayuda».</p>
+      <p>Para dictar texto libre en cualquier formulario, selecciona primero el campo y cambia a «Dictar en el campo seleccionado». No se dictan contraseñas.</p>
+      <button type="button" id="vg-simular" class="vg-simular">Simular fallo del micrófono</button>
+    </details>
+  </section>
+
+  <button
+    id="vg-flotante"
+    type="button"
+    class="vg-flotante"
+    aria-controls="vg-panel"
+    aria-expanded="false"
+    aria-label="Abrir asistente y activar micrófono"
+    title="Asistente de voz: pulsar para hablar"
+  >
+    <span class="vg-micro" aria-hidden="true">🎙</span>
+    <span class="vg-texto">Voz</span>
+  </button>
+</div>
+
+<dialog id="vg-conflicto" class="vg-dialogo" aria-labelledby="vg-conflicto-titulo" aria-describedby="vg-conflicto-detalle">
+  <h2 id="vg-conflicto-titulo">Confirma el horario</h2>
+  <p id="vg-conflicto-detalle"></p>
+  <div class="vg-acciones">
+    <button type="button" id="vg-conservar" class="vg-secundario">Conservar actual</button>
+    <button type="button" id="vg-aplicar" class="vg-primario">Aplicar nuevo</button>
+  </div>
+</dialog>
+
+<style>
+  .vg-widget { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 9999; font-family: system-ui, sans-serif; }
+  .vg-widget * { box-sizing: border-box; }
+  .vg-flotante { min-height: 58px; min-width: 70px; padding: 12px 16px; border-radius: 999px; background: #047857; color: #fff; font-weight: 750; font-size: 14px; border: 2px solid #a7f3d0; box-shadow: 0 6px 20px #0005; display: flex; align-items: center; gap: 7px; cursor: pointer; margin-left: auto; }
+  .vg-flotante:hover, .vg-primario:hover { background: #065f46; }
+  .vg-flotante.vg-escuchando { background: #b91c1c; border-color: #fecaca; animation: vg-pulsar 1.4s infinite; }
+  @keyframes vg-pulsar { 50% { box-shadow: 0 0 0 9px #05966933; } }
+  @media (prefers-reduced-motion: reduce) { .vg-flotante.vg-escuchando { animation: none; } }
+  .vg-micro { font-size: 22px; line-height: 1; }
+  .vg-panel { position: absolute; right: 0; bottom: calc(100% + 10px); width: min(390px, calc(100vw - 24px)); max-height: min(68vh, 610px); overflow-y: auto; color: #f8fafc; background: #142238; border: 1px solid #34d399; box-shadow: 0 14px 40px #0009; border-radius: 16px; padding: 18px; }
+  .vg-panel[hidden], .vg-error[hidden] { display: none !important; }
+  .vg-encabezado { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .vg-encabezado h2 { font-size: 17px; color: #6ee7b7; font-weight: 700; margin: 0 0 4px; }
+  .vg-encabezado p, .vg-ayuda p { color: #e2e8f0; font-size: 12px; margin: 0 0 8px; line-height: 1.5; }
+  .vg-cerrar { color: #f8fafc; padding: 3px 8px; font-size: 22px; cursor: pointer; }
+  .vg-opciones { margin-top: 14px; display: grid; gap: 6px; }
+  .vg-opciones label { font-size: 13px; font-weight: 600; }
+  .vg-opciones select { width: 100%; border-radius: 8px; border: 1px solid #94a3b8; min-height: 40px; padding: 6px 8px; color: white; background: #0f172a; }
+  .vg-acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .vg-primario, .vg-secundario { border-radius: 9px; padding: 9px 12px; min-height: 40px; font-size: 13px; font-weight: 650; cursor: pointer; }
+  .vg-primario { background: #047857; color: white; }
+  .vg-secundario { color: #fff; background: #1e293b; border: 1px solid #64748b; }
+  .vg-secundario:hover { background: #334155; }
+  .vg-primario:disabled { opacity: .55; cursor: not-allowed; }
+  .vg-estado { font-size: 13px; line-height: 1.45; color: #d1fae5; margin: 12px 0 0; }
+  .vg-error { font-size: 12px; line-height: 1.5; margin-top: 8px; padding: 10px; border-radius: 8px; background: #78350f; color: #fff; }
+  .vg-horarios { border-top: 1px solid #475569; margin-top: 12px; padding-top: 8px; }
+  .vg-horarios legend { font-size: 12px; color: #e2e8f0; padding-top: 12px; }
+  .vg-horarios .vg-acciones { margin-top: 5px; }
+  .vg-ayuda { margin-top: 14px; border-top: 1px solid #475569; padding-top: 10px; }
+  .vg-ayuda summary { color: #6ee7b7; cursor: pointer; text-decoration: underline; font-size: 13px; font-weight: 600; }
+  .vg-ayuda p { margin-top: 9px; }
+  .vg-simular { border-radius: 8px; border: 1px solid #fbbf24; color: #fde68a; padding: 8px 10px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .vg-widget button:focus-visible, .vg-widget select:focus-visible, .vg-widget summary:focus-visible, .vg-dialogo button:focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
+  .vg-dialogo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(92vw, 450px); padding: 22px; margin: 0; border-radius: 14px; border: 1px solid #94a3b8; background: #0f172a; color: #fff; box-shadow: 0 8px 40px #0008; }
+  .vg-dialogo::backdrop { background: #020617ae; }
+  .vg-dialogo h2 { font-weight: 750; font-size: 19px; }
+  .vg-dialogo p { font-size: 14px; margin-top: 10px; line-height: 1.5; }
+  @media (max-width: 480px) { .vg-flotante { min-width: 58px; min-height: 58px; padding: 10px; } .vg-texto { display: none; } .vg-panel { max-height: min(66vh, 550px); } }
+</style>
+
+<script>
+  type VozResultado = { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+  type VozInstancia = {
+    lang: string; continuous: boolean; interimResults: boolean;
+    onstart: (() => void) | null;
+    onresult: ((evento: VozResultado) => void) | null;
+    onerror: ((evento: { error: string }) => void) | null;
+    onend: (() => void) | null;
+    start: () => void; abort: () => void;
+  };
+  type VozConstructor = new () => VozInstancia;
+  type VentanaVoz = Window & { SpeechRecognition?: VozConstructor; webkitSpeechRecognition?: VozConstructor; webkitAudioContext?: typeof AudioContext };
+  type CampoTexto = HTMLInputElement | HTMLTextAreaElement;
+  type Horario = { inicio: string; fin: string; origen: 'voz' | 'clic'; momento: number };
+
+  const obtener = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const widget = obtener<HTMLDivElement>('vg-widget');
+  const panel = obtener<HTMLElement>('vg-panel');
+  const flotante = obtener<HTMLButtonElement>('vg-flotante');
+  const cerrar = obtener<HTMLButtonElement>('vg-cerrar');
+  const hablar = obtener<HTMLButtonElement>('vg-hablar');
+  const teclado = obtener<HTMLButtonElement>('vg-teclado');
+  const modo = obtener<HTMLSelectElement>('vg-modo');
+  const estado = obtener<HTMLElement>('vg-estado');
+  const error = obtener<HTMLElement>('vg-error');
+  const ayuda = document.querySelector<HTMLDetailsElement>('.vg-ayuda');
+  const dialogo = obtener<HTMLDialogElement>('vg-conflicto');
+  const detalle = obtener<HTMLElement>('vg-conflicto-detalle');
+  const ventana = window as VentanaVoz;
+  const Constructor = ventana.SpeechRecognition || ventana.webkitSpeechRecognition;
+  let reconocimiento: VozInstancia | null = null;
+  let escuchando = false;
+  let cancelado = false;
+  let ultimoCampo: CampoTexto | null = null;
+  let horarioActual: Horario | null = null;
+  let horarioPendiente: Horario | null = null;
+  let audio: AudioContext | null = null;
+  const normalizar = (valor: string) => valor.toLocaleLowerCase('es-PE').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const camposTurno = ['actividad', 'lugar', 'fecha', 'inicio', 'fin', 'cupos', 'funciones'] as const;
+  type CampoTurno = typeof camposTurno[number];
+
+  function informar(texto: string, fallo = false) {
+    if (estado) estado.textContent = texto;
+    if (error) { error.hidden = !fallo; error.textContent = fallo ? texto : ''; }
+  }
+  function prepararAudio() {
+    try {
+      const Contexto = window.AudioContext || ventana.webkitAudioContext;
+      if (Contexto && !audio) audio = new Contexto();
+      if (audio?.state === 'suspended') void audio.resume();
+    } catch { /* El mensaje sigue disponible sin sonido. */ }
+  }
+  function confirmar() {
+    try {
+      if (audio && audio.state === 'running') {
+        const tono = audio.createOscillator();
+        const ganancia = audio.createGain();
+        tono.frequency.value = 670;
+        ganancia.gain.setValueAtTime(.025, audio.currentTime);
+        ganancia.gain.exponentialRampToValueAtTime(.001, audio.currentTime + .12);
+        tono.connect(ganancia); ganancia.connect(audio.destination);
+        tono.start(); tono.stop(audio.currentTime + .13);
+      }
+    } catch { /* El audio es opcional. */ }
+    try { if ('vibrate' in navigator) navigator.vibrate(60); } catch { /* Opcional. */ }
+  }
+  function visible(campo: HTMLElement) {
+    return campo.isConnected && !campo.closest('[hidden]') && getComputedStyle(campo).display !== 'none';
+  }
+  function editable(campo: Element | null): campo is CampoTexto {
+    if (!(campo instanceof HTMLInputElement || campo instanceof HTMLTextAreaElement)) return false;
+    if (campo.disabled || campo.readOnly || !visible(campo)) return false;
+    if (campo instanceof HTMLInputElement) {
+      if (!['text', 'search', 'email', 'url', 'tel', 'number'].includes(campo.type)) return false;
+      // Por seguridad no dictar contraseñas, tokens ni secretos.
+      if (/password|clave|token|secret|jwt/i.test(`${campo.name} ${campo.id} ${campo.autocomplete}`)) return false;
+    }
+    return true;
+  }
+  document.addEventListener('focusin', (evento) => {
+    if (editable(evento.target as Element) && !widget?.contains(evento.target as Node)) ultimoCampo = evento.target as CampoTexto;
+  });
+  function usarTeclado(mensaje: string, fallo = false) {
+    informar(mensaje, fallo);
+    const destino = editable(ultimoCampo) ? ultimoCampo : document.querySelector<CampoTexto>('#actividad, #lugar, #email, textarea:not([readonly]), input[type="text"]:not([readonly])');
+    if (editable(destino)) destino.focus();
+  }
+  function escribir(campo: CampoTexto, texto: string) {
+    campo.value = texto.slice(0, campo.maxLength > 0 ? campo.maxLength : 5000);
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.dispatchEvent(new Event('change', { bubbles: true }));
+    informar(`Campo ${campo.id || campo.name || 'seleccionado'} actualizado: ${campo.value}`);
+    confirmar();
+  }
+  function escribirTurno(nombre: CampoTurno, texto: string) {
+    const campo = obtener<HTMLInputElement | HTMLTextAreaElement>(nombre);
+    if (!campo) { informar('Este campo solo está disponible en Crear turno.', true); return; }
+    campo.value = texto.slice(0, campo.maxLength > 0 ? campo.maxLength : 5000);
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.dispatchEvent(new Event('change', { bubbles: true }));
+    informar(`${nombre}: ${campo.value}`);
+    confirmar();
+  }
+  function abrirPanel() { if (!panel) return; panel.hidden = false; flotante?.setAttribute('aria-expanded', 'true'); }
+  function detener() {
+    cancelado = true;
+    try { reconocimiento?.abort(); } catch { /* Nada que detener. */ }
+    reconocimiento = null;
+    escuchando = false;
+    if (hablar) hablar.disabled = !Constructor;
+    flotante?.classList.remove('vg-escuchando');
+  }
+  function cerrarPanel(devolverFoco = false) {
+    detener();
+    if (panel) panel.hidden = true;
+    flotante?.setAttribute('aria-expanded', 'false');
+    if (devolverFoco) flotante?.focus();
+  }
+  function horaNumero(valor: string): number | null {
+    const palabras: Record<string, number> = { cero:0, una:1, uno:1, dos:2, tres:3, cuatro:4, cinco:5, seis:6, siete:7, ocho:8, nueve:9, diez:10, once:11, doce:12, trece:13, catorce:14, quince:15, dieciseis:16, diecisiete:17, dieciocho:18, diecinueve:19, veinte:20, veintiuno:21, veintidos:22, veintitres:23 };
+    const limpio = normalizar(valor).replace(/^(?:a\s+las\s+|las\s+)/, '');
+    const coincide = limpio.match(/^(\d{1,2}|[a-z]+)(?:\s*(?::|y)\s*(\d{1,2}|media|cuarto))?/);
+    if (!coincide) return null;
+    let horas = /^\d+$/.test(coincide[1]) ? Number(coincide[1]) : palabras[coincide[1]];
+    if (!Number.isInteger(horas) || horas < 0 || horas > 23) return null;
+    const minTexto = coincide[2];
+    const minutos = minTexto === 'media' ? 30 : minTexto === 'cuarto' ? 15 : (minTexto ? Number(minTexto) : 0);
+    if (!Number.isInteger(minutos) || minutos < 0 || minutos > 59) return null;
+    if (/(?:de la|por la) tarde|de la noche/.test(limpio) && horas >= 1 && horas <= 11) horas += 12;
+    if (/(?:de la|por la) manana/.test(limpio) && horas === 12) horas = 0;
+    return horas * 60 + minutos;
+  }
+  function hhmm(minutos: number) { return `${String(Math.floor(minutos / 60)).padStart(2, '0')}:${String(minutos % 60).padStart(2, '0')}`; }
+  function finPorDefecto(inicioMin: number) {
+    if (inicioMin < 13 * 60) return 13 * 60;
+    if (inicioMin < 18 * 60) return 18 * 60;
+    return Math.min(inicioMin + 120, 23 * 60 + 59);
+  }
+  function horarioSeleccionado(nuevo: Horario) {
+    if (!obtener('inicio') || !obtener('fin')) { informar('Esta orden de horario se utiliza en Crear turno.', true); return; }
+    if (horarioPendiente) return;
+    if (horarioActual && nuevo.origen !== horarioActual.origen && (horarioActual.inicio !== nuevo.inicio || horarioActual.fin !== nuevo.fin) && Date.now() - horarioActual.momento <= 6000) {
+      horarioPendiente = nuevo;
+      if (detalle) detalle.textContent = `Horario anterior: ${horarioActual.inicio}–${horarioActual.fin}. Nueva orden: ${nuevo.inicio}–${nuevo.fin}. ¿Cuál prefieres?`;
+      informar('Se detectaron horarios contradictorios. Confirma antes de cambiar.');
+      dialogo?.showModal();
+      obtener<HTMLButtonElement>('vg-conservar')?.focus();
+      return;
+    }
+    aplicarHorario(nuevo);
+  }
+  function aplicarHorario(nuevo: Horario) {
+    escribirTurno('inicio', nuevo.inicio);
+    escribirTurno('fin', nuevo.fin);
+    horarioActual = { ...nuevo, momento: Date.now() };
+    informar(`Horario seleccionado: ${nuevo.inicio}–${nuevo.fin}.`);
+    confirmar();
+  }
+  function seleccionarFranja(fr: 'manana' | 'tarde', origen: 'voz' | 'clic') {
+    horarioSeleccionado({ inicio: fr === 'manana' ? '08:00' : '14:00', fin: fr === 'manana' ? '13:00' : '18:00', origen, momento: Date.now() });
+  }
+  function fechaInterpretada(entrada: string): string | null {
+    const meses: Record<string, number> = { enero:1, febrero:2, marzo:3, abril:4, mayo:5, junio:6, julio:7, agosto:8, septiembre:9, setiembre:9, octubre:10, noviembre:11, diciembre:12 };
+    const texto = normalizar(entrada).replace(/\bde\b/g, ' ').replace(/\s+/g, ' ').trim();
+    const e = texto.match(/^(\d{1,2})\s+([a-z]+)(?:\s+(\d{4}))?$/);
+    if (!e || !meses[e[2]]) return null;
+    const anio = Number(e[3] || new Intl.DateTimeFormat('en-US', { timeZone: 'America/Lima', year: 'numeric' }).format(new Date()));
+    const mes = meses[e[2]], dia = Number(e[1]);
+    const fecha = new Date(Date.UTC(anio, mes - 1, dia));
+    if (fecha.getUTCFullYear() !== anio || fecha.getUTCMonth() + 1 !== mes || fecha.getUTCDate() !== dia) return null;
+    return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+  }
+  function navegar(ruta: string) {
+    if (location.pathname === ruta) { informar('Ya estás en esa pantalla.'); return; }
+    const form = obtener<HTMLFormElement>('form-turno');
+    const hayDatos = form && Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input,textarea')).some(c => !c.readOnly && c.value.trim());
+    if (hayDatos && !confirm('Hay información sin guardar en Crear turno. ¿Deseas abandonar esta pantalla?')) { informar('Se conservó el formulario.'); return; }
+    informar('Abriendo la pantalla solicitada...');
+    window.location.assign(ruta);
+  }
+  function paso(adelante: boolean) {
+    const candidatos = adelante ? ['siguiente-1', 'siguiente-2'] : ['anterior-2', 'editar'];
+    const encontrado = candidatos.map(id => obtener<HTMLButtonElement>(id)).find(b => !!b && visible(b) && !b.disabled);
+    if (encontrado) { encontrado.click(); informar(`Se solicitó ${adelante ? 'avanzar' : 'retroceder'} de paso.`); }
+    else informar('No hay un paso disponible para esa acción en esta pantalla.', true);
+  }
+  function procesar(transcripcion: string) {
+    const original = transcripcion.trim().replace(/[.!?]+$/, '');
+    const t = normalizar(original);
+    if (!t) { usarTeclado('No se detectó voz. Puedes volver a intentarlo o escribir.', true); return; }
+    if (modo?.value === 'dictado') {
+      if (editable(ultimoCampo)) escribir(ultimoCampo, original);
+      else usarTeclado('Primero selecciona un campo de texto editable. Las contraseñas no se dictan.', true);
+      return;
+    }
+    // Los campos llevan prioridad para que «actividad de mañana» sea texto, no un cambio de horario.
+    const campo = original.match(/^(?:seleccionar\s+)?(actividad|lugar|funciones|cupos)\s*(?::|es\s+)?\s*(.+)$/i);
+    if (campo && obtener(campo[1].toLowerCase())) {
+      if (campo[1].toLowerCase() === 'cupos') {
+        const cantidad = Number(campo[2].match(/\d+/)?.[0]);
+        if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 500) { informar('Indica una cantidad de cupos entre 1 y 500.', true); return; }
+        escribirTurno('cupos', String(cantidad));
+      } else escribirTurno(campo[1].toLowerCase() as CampoTurno, campo[2]);
+      return;
+    }
+    const rutas: [RegExp, string][] = [
+      [/^(?:abrir|ir a|mostrar|ver) (?:el )?(?:panel principal|dashboard)$/, '/dashboard'],
+      [/^(?:abrir|ir a|mostrar|ver) (?:el )?calendario$/, '/calendario'],
+      [/^(?:abrir|ir a|mostrar|ver) (?:la pantalla de )?crear turno$|^crear turno$/, '/crear-turno'],
+      [/^(?:ir a|abrir|volver al) inicio$/, '/'],
+      [/^(?:abrir|ir a) (?:el )?(?:inicio de sesion|login)$/, '/login']
+    ];
+    const ruta = rutas.find(([patron]) => patron.test(t));
+    if (ruta) { navegar(ruta[1]); return; }
+    if (location.pathname === '/calendario') {
+      const accionCalendario: [RegExp, string][] = [
+        [/^(?:mes siguiente|siguiente mes|semana siguiente|siguiente semana)$/, 'siguiente'],
+        [/^(?:mes anterior|anterior mes|semana anterior|anterior semana)$/, 'anterior'],
+        [/^(?:ir a hoy|mostrar hoy|hoy)$/, 'hoy']
+      ];
+      const accion = accionCalendario.find(([patron]) => patron.test(t));
+      if (accion) {
+        obtener<HTMLButtonElement>(accion[1])?.click();
+        informar(`Calendario: ${t}.`); confirmar(); return;
+      }
+    }
+    if (/^(?:cambiar tema|modo oscuro|modo claro)$/.test(t)) {
+      const oscuro = document.documentElement.classList.contains('dark');
+      if (t === 'cambiar tema' || (t === 'modo oscuro' && !oscuro) || (t === 'modo claro' && oscuro)) {
+        const botonTema = obtener<HTMLButtonElement>('cambiar-tema');
+        if (botonTema) { botonTema.click(); informar('Tema actualizado.'); confirmar(); }
+        else informar('El control del tema no está disponible en esta pantalla.', true);
+      } else informar('Ese tema ya está activado.');
+      return;
+    }
+    if (/^(?:siguiente(?: paso)?|avanzar)$/.test(t)) { paso(true); return; }
+    if (/^(?:anterior(?: paso)?|retroceder|editar datos)$/.test(t)) { paso(false); return; }
+    if (/^(?:ayuda|mostrar ayuda|ver comandos)$/.test(t)) { if (ayuda) ayuda.open = true; informar('Abrí los ejemplos de comandos.'); return; }
+    if (/^(?:guardar|publicar|eliminar|borrar|cerrar sesion)(?:\b|$)/.test(t)) { informar('Por seguridad, confirma esta acción con los controles de la pantalla.', true); return; }
+    const fecha = t.match(/^fecha\s+(.+)$/);
+    if (fecha && obtener('fecha')) {
+      const valor = fechaInterpretada(fecha[1]);
+      if (valor) escribirTurno('fecha', valor); else informar('Fecha no entendida. Prueba «fecha 20 de noviembre de 2026».', true);
+      return;
+    }
+    if (/^(?:seleccionar\s+)?manana$/.test(t)) { seleccionarFranja('manana', 'voz'); return; }
+    if (/^(?:seleccionar\s+)?tarde$/.test(t)) { seleccionarFranja('tarde', 'voz'); return; }
+    const soloFin = t.match(/^(?:fin|termina(?: a las)?|hora de fin)\s+(.+)$/);
+    if (soloFin && obtener('fin')) {
+      const m = horaNumero(soloFin[1]);
+      if (m === null) { informar('No entendí la hora de fin.', true); return; }
+      const inicial = obtener<HTMLInputElement>('inicio')?.value;
+      if (inicial && m <= Number(inicial.slice(0,2))*60 + Number(inicial.slice(3,5))) { informar('La hora de fin debe ser posterior al inicio.', true); return; }
+      escribirTurno('fin', hhmm(m)); return;
+    }
+    const horario = t.match(/^(?:hora(?:\s+de\s+inicio)?|inicio|desde)\s+(.+)$/);
+    if (horario && obtener('inicio')) {
+      const trozos = horario[1].split(/\s+(?:termina|hasta|a las|finaliza)\s+/);
+      const desde = horaNumero(trozos[0]);
+      if (desde === null) { informar('No entendí la hora de inicio.', true); return; }
+      const hasta = trozos[1] ? horaNumero(trozos[1]) : finPorDefecto(desde);
+      if (hasta === null || hasta <= desde) { informar('La hora de fin debe ser posterior al inicio.', true); return; }
+      horarioSeleccionado({ inicio: hhmm(desde), fin: hhmm(hasta), origen: 'voz', momento: Date.now() });
+      return;
+    }
+    usarTeclado(`No entendí «${original}». Prueba «abrir calendario», «actividad ...», «hora 8 termina 10» o selecciona un campo para dictar.`, true);
+  }
+  function iniciar() {
+    abrirPanel();
+    prepararAudio();
+    if (!Constructor) { usarTeclado('Tu navegador no admite reconocimiento de voz. Puedes seguir con el teclado.', true); return; }
+    if (escuchando) { detener(); informar('Escucha detenida.'); return; }
+    cancelado = false;
+    try {
+      const instancia = new Constructor();
+      reconocimiento = instancia;
+      instancia.lang = 'es-PE';
+      instancia.continuous = false;
+      instancia.interimResults = false;
+      instancia.onstart = () => { if (cancelado) return; escuchando = true; flotante?.classList.add('vg-escuchando'); informar('Escuchando… Di una instrucción o una frase.'); };
+      instancia.onresult = e => { if (!cancelado) procesar(e.results[0]?.[0]?.transcript || ''); };
+      instancia.onerror = e => {
+        if (cancelado) return;
+        const explicacion = e.error === 'no-speech' ? 'No se detectó voz.' : `El micrófono no pudo reconocer tu orden (${e.error}).`;
+        informar(`${explicacion} Vuelve a intentarlo o usa el teclado; tus datos se conservaron.`, true);
+      };
+      instancia.onend = () => { escuchando = false; flotante?.classList.remove('vg-escuchando'); if (hablar) hablar.disabled = !Constructor; };
+      instancia.start();
+      if (hablar) hablar.disabled = true;
+    } catch {
+      escuchando = false; flotante?.classList.remove('vg-escuchando');
+      if (hablar) hablar.disabled = !Constructor;
+      usarTeclado('No se pudo iniciar el micrófono. Continúa con el teclado.', true);
+    }
+  }
+  flotante?.addEventListener('click', () => {
+    if (escuchando) { detener(); informar('Micrófono detenido.'); }
+    else iniciar();
+  });
+  hablar?.addEventListener('click', iniciar);
+  cerrar?.addEventListener('click', () => cerrarPanel(true));
+  teclado?.addEventListener('click', () => { cerrarPanel(); usarTeclado('Modo teclado activado. No se borró ningún dato.'); });
+  obtener<HTMLButtonElement>('vg-simular')?.addEventListener('click', () => { detener(); informar('Fallo simulado del micrófono. Sigue escribiendo; todos los datos se conservaron.', true); });
+  obtener<HTMLButtonElement>('vg-manana')?.addEventListener('click', () => seleccionarFranja('manana', 'clic'));
+  obtener<HTMLButtonElement>('vg-tarde')?.addEventListener('click', () => seleccionarFranja('tarde', 'clic'));
+  obtener<HTMLButtonElement>('vg-conservar')?.addEventListener('click', () => { horarioPendiente = null; dialogo?.close(); informar('Se conservó el horario anterior.'); confirmar(); });
+  obtener<HTMLButtonElement>('vg-aplicar')?.addEventListener('click', () => { const pendiente = horarioPendiente; horarioPendiente = null; dialogo?.close(); if (pendiente) aplicarHorario(pendiente); });
+  dialogo?.addEventListener('cancel', () => { horarioPendiente = null; informar('Se conservó el horario anterior.'); });
+  document.addEventListener('keydown', (evento) => { if (evento.key === 'Escape' && panel && !panel.hidden && !dialogo?.open) { cerrarPanel(true); evento.preventDefault(); } });
+  document.addEventListener('pointerdown', (evento) => {
+    if (panel && !panel.hidden && widget && evento.target instanceof Node && !widget.contains(evento.target) && !dialogo?.open) cerrarPanel();
+  });
+  // No acceder al micrófono durante la carga de página. No escuchar en segundo plano.
+</script>

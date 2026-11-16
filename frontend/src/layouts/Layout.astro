@@ -1,6 +1,7 @@
 
 ---
 import '../styles/global.css';
+import AsistenteVozGlobal from '../components/AsistenteVozGlobal.astro';
 ---
 
 <!doctype html>
@@ -12,5 +13,7 @@ import '../styles/global.css';
   </head>
   <body class="min-h-screen bg-slate-50 text-slate-900">
     <slot />
+    <!-- Botón de micrófono disponible en todo VolunTurno -->
+    <AsistenteVozGlobal />
   </body>
 </html>
