@@ -13,55 +13,55 @@ import AppShell from '../components/AppShell.astro';
 
     <!-- INDICADORES PRINCIPALES -->
     <section
-      aria-label="Indicadores generales"
+      aria-label="Indicadores generales" data-i18n-aria-label="dashboard.generalIndicators"
       class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
     >
       <article class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
         <h2 class="text-sm text-slate-600 dark:text-slate-400">
-          Turnos próximos
+          <span data-i18n="dashboard.upcomingCount">Turnos próximos</span>
         </h2>
         <p id="total-turnos" class="mt-2 text-3xl font-bold">—</p>
         <p class="mt-2 text-xs text-emerald-700 dark:text-emerald-400">
-          Próximas actividades
+          <span data-i18n="dashboard.upcomingActivities">Próximas actividades</span>
         </p>
       </article>
 
       <article class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
         <h2 class="text-sm text-slate-600 dark:text-slate-400">
-          Cupos por cubrir
+          <span data-i18n="dashboard.vacancies">Cupos por cubrir</span>
         </h2>
         <p id="total-cupos" class="mt-2 text-3xl font-bold">—</p>
         <p class="mt-2 text-xs text-amber-700 dark:text-amber-400">
-          Pendientes de asignación
+          <span data-i18n="dashboard.pendingAssignment">Pendientes de asignación</span>
         </p>
       </article>
 
       <article class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
         <h2 class="text-sm text-slate-600 dark:text-slate-400">
-          Personas activas
+          <span data-i18n="dashboard.activePeople">Personas activas</span>
         </h2>
         <p id="total-personas" class="mt-2 text-3xl font-bold">—</p>
         <p class="mt-2 text-xs text-emerald-700 dark:text-emerald-400">
-          Equipo registrado
+          <span data-i18n="dashboard.registeredTeam">Equipo registrado</span>
         </p>
       </article>
 
       <article class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
         <h2 class="text-sm text-slate-600 dark:text-slate-400">
-          Asistencias pendientes
+          <span data-i18n="dashboard.pendingAttendance">Asistencias pendientes</span>
         </h2>
         <p id="total-asistencias" class="mt-2 text-3xl font-bold">—</p>
         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          Por verificar
+          <span data-i18n="dashboard.toVerify">Por verificar</span>
         </p>
       </article>
     </section>
 
     <!-- ESTADOS DE INTERFAZ -->
-    <section class="mt-5" aria-label="Estados de interfaz">
+    <section class="mt-5" aria-label="Estados de interfaz" data-i18n-aria-label="dashboard.statesLabel">
       <div class="flex flex-wrap items-center gap-3">
         <label for="estado-demo" class="text-sm font-medium">
-          Vista de estados:
+          <span data-i18n="dashboard.statesView">Vista de estados:</span>
         </label>
 
         <select
@@ -70,12 +70,12 @@ import AppShell from '../components/AppShell.astro';
                  px-3 py-2 text-sm dark:border-slate-700
                  dark:bg-slate-900"
         >
-          <option value="real">Datos reales</option>
-          <option value="ideal">Ideal (demostración)</option>
-          <option value="empty">Vacío (demostración)</option>
-          <option value="loading">Cargando (demostración)</option>
-          <option value="partial">Parcial (demostración)</option>
-          <option value="error">Error (demostración)</option>
+          <option value="real" data-i18n="dashboard.real">Datos reales</option>
+          <option value="ideal" data-i18n="dashboard.ideal">Ideal (demostración)</option>
+          <option value="empty" data-i18n="dashboard.empty">Vacío (demostración)</option>
+          <option value="loading" data-i18n="dashboard.loading">Cargando (demostración)</option>
+          <option value="partial" data-i18n="dashboard.partial">Parcial (demostración)</option>
+          <option value="error" data-i18n="dashboard.error">Error (demostración)</option>
         </select>
       </div>
 
@@ -85,8 +85,29 @@ import AppShell from '../components/AppShell.astro';
         aria-live="polite"
         class="mt-2 text-xs text-slate-500 dark:text-slate-400"
       >
-        Se muestran los datos disponibles del sistema.
+        <span data-i18n="dashboard.availableData">Se muestran los datos disponibles del sistema.</span>
       </p>
+    </section>
+
+
+    <!-- FORMATOS REGIONALES: valores ilustrativos y no datos financieros reales -->
+    <section aria-labelledby="formato-local-titulo" class="mt-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <h2 id="formato-local-titulo" class="mb-3 text-sm font-bold" data-i18n="dashboard.localeExample">Ejemplo de formatos regionales</h2>
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="min-w-0 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+          <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="dashboard.date">Fecha</p>
+          <p id="formato-fecha" class="break-words text-sm font-semibold">16/11/2026</p>
+        </div>
+        <div class="min-w-0 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+          <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="dashboard.time">Hora</p>
+          <p id="formato-hora" class="break-words text-sm font-semibold">14:30</p>
+        </div>
+        <div class="min-w-0 rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+          <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="dashboard.currency">Moneda</p>
+          <p id="formato-moneda" class="break-words text-sm font-semibold">S/ 1,250.50</p>
+        </div>
+      </div>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" data-i18n="dashboard.localeDisclaimer">Valores demostrativos; no representan pagos reales.</p>
     </section>
 
     <!-- CONTENIDO INFERIOR -->
@@ -95,27 +116,27 @@ import AppShell from '../components/AppShell.astro';
       <!-- PRÓXIMOS TURNOS -->
       <section class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
         <div class="mb-4 flex items-center justify-between gap-2">
-          <h2 class="text-base font-bold">Próximos turnos</h2>
+          <h2 class="text-base font-bold"><span data-i18n="dashboard.upcoming">Próximos turnos</span></h2>
           <a
             href="/calendario"
             class="text-sm font-medium text-emerald-700
                    hover:underline dark:text-emerald-400"
           >
-            Ver calendario →
+            <span data-i18n="dashboard.viewCalendar">Ver calendario →</span>
           </a>
         </div>
 
         <div id="lista-turnos" aria-live="polite">
-          <p class="text-sm text-slate-500">Cargando información...</p>
+          <p class="text-sm text-slate-500"><span data-i18n="dashboard.loadingInfo">Cargando información...</span></p>
         </div>
       </section>
 
       <!-- TAREAS PRIORITARIAS -->
       <section class="rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900">
-        <h2 class="mb-4 text-base font-bold">Tareas prioritarias</h2>
+        <h2 class="mb-4 text-base font-bold"><span data-i18n="dashboard.priorityTasks">Tareas prioritarias</span></h2>
 
         <div id="lista-tareas" aria-live="polite">
-          <p class="text-sm text-slate-500">Cargando información...</p>
+          <p class="text-sm text-slate-500"><span data-i18n="dashboard.loadingInfo">Cargando información...</span></p>
         </div>
       </section>
     </div>
@@ -124,231 +145,116 @@ import AppShell from '../components/AppShell.astro';
 </Layout>
 
 <script>
-  type Resumen = {
-    turnos: number;
-    cupos: number;
-    personas: number;
-    asistencias: number;
-  };
+  import { traducir as t, formatoFecha, formatoHora, formatoMoneda } from '../utils/i18n';
 
-  const resumenVacio: Resumen = {
-    turnos: 0,
-    cupos: 0,
-    personas: 0,
-    asistencias: 0
-  };
-
-  // Datos ilustrativos basados en la pantalla de Figma.
-  // NO son registros de MySQL.
-  const resumenFigma: Resumen = {
-    turnos: 4,
-    cupos: 7,
-    personas: 32,
-    asistencias: 1
-  };
-
-  const indicadores = [
-    'total-turnos',
-    'total-cupos',
-    'total-personas',
-    'total-asistencias'
-  ];
-
-  const listaTurnos = document.querySelector<HTMLElement>('#lista-turnos');
-  const listaTareas = document.querySelector<HTMLElement>('#lista-tareas');
+  type Resumen = { turnos: number; cupos: number; personas: number; asistencias: number };
+  const vacio: Resumen = { turnos: 0, cupos: 0, personas: 0, asistencias: 0 };
+  // Muestra Figma (valores de ejemplo, no extraídos de MySQL).
+  const ejemplo: Resumen = { turnos: 4, cupos: 7, personas: 32, asistencias: 1 };
+  const indicadores = ['total-turnos', 'total-cupos', 'total-personas', 'total-asistencias'];
+  const turnos = document.querySelector<HTMLElement>('#lista-turnos');
+  const tareas = document.querySelector<HTMLElement>('#lista-tareas');
   const aviso = document.querySelector<HTMLElement>('#aviso-demo');
   const selector = document.querySelector<HTMLSelectElement>('#estado-demo');
+  let autenticado = false;
 
-  function mostrarResumen(datos: Resumen | null) {
-    const valores = datos
-      ? [datos.turnos, datos.cupos, datos.personas, datos.asistencias]
-      : ['—', '—', '—', '—'];
-
-    indicadores.forEach((id, indice) => {
-      const elemento = document.getElementById(id);
-      if (elemento) elemento.textContent = String(valores[indice]);
+  function resumen(datos: Resumen | null) {
+    const valores = datos ? [datos.turnos, datos.cupos, datos.personas, datos.asistencias] : ['—', '—', '—', '—'];
+    indicadores.forEach((id, i) => {
+      const campo = document.getElementById(id);
+      if (campo) campo.textContent = String(valores[i]);
     });
   }
 
   function mostrarVacio() {
-    mostrarResumen(resumenVacio);
-
-    if (listaTurnos) {
-      listaTurnos.innerHTML = `
-        <div class="rounded-lg bg-slate-50 p-6 text-center
-                    dark:bg-slate-800">
-          <p class="font-semibold">No hay turnos próximos</p>
-          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Crea tu primer turno para comenzar a organizar actividades.
-          </p>
-          <a href="/crear-turno"
-             class="mt-4 inline-block rounded-lg bg-emerald-700
-                    px-4 py-2 text-sm font-medium text-white">
-            + Crear turno
-          </a>
-        </div>
-      `;
-    }
-
-    if (listaTareas) {
-      listaTareas.innerHTML = `
-        <p class="rounded-lg bg-slate-50 p-5 text-sm
-                  text-slate-600 dark:bg-slate-800
-                  dark:text-slate-300">
-          No hay tareas prioritarias registradas.
-        </p>
-      `;
-    }
+    resumen(vacio);
+    if (turnos) turnos.innerHTML = `
+      <div class="rounded-lg bg-slate-50 p-6 text-center dark:bg-slate-800">
+        <p class="font-semibold">${t('dashboard.emptyUpcoming')}</p>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">${t('dashboard.createFirst')}</p>
+        <a href="/crear-turno" class="mt-4 inline-block max-w-full rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white break-words">${t('dashboard.createShift')}</a>
+      </div>`;
+    if (tareas) tareas.innerHTML = `<p class="rounded-lg bg-slate-50 p-5 text-sm text-slate-600 dark:bg-slate-800 dark:text-slate-300">${t('dashboard.emptyTasks')}</p>`;
   }
 
   function mostrarIdeal() {
-    mostrarResumen(resumenFigma);
+    resumen(ejemplo);
+    const muestras: Array<[string, string, string]> = [
+      ['dashboard.sample1', 'dashboard.needStaff', 'dashboard.slotsPending'],
+      ['dashboard.sample2', 'dashboard.confirmed', 'dashboard.slotsFull'],
+      ['dashboard.sample3', 'dashboard.needStaff', 'dashboard.slotsTwo']
+    ];
+    if (turnos) turnos.innerHTML = `<div class="space-y-3">${muestras.map(([titulo,estado,detalle]) => `
+      <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
+        <p class="break-words text-sm font-semibold">${t(titulo)}</p>
+        <p class="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">${t(detalle)}</p>
+        <span class="mt-2 inline-block max-w-full break-words rounded-md px-2 py-1 text-xs ${estado === 'dashboard.confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">${t(estado)}</span>
+      </div>`).join('')}</div>`;
+    if (tareas) tareas.innerHTML = `<ul class="space-y-3 text-sm">${['dashboard.taskCover','dashboard.taskAttendance','dashboard.taskResponsible']
+      .map(clave => `<li class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">${t(clave)}</li>`).join('')}</ul>`;
+  }
 
-    if (listaTurnos) {
-      listaTurnos.innerHTML = `
-        <div class="space-y-3">
-          ${[
-            ['Reforestación · Cerro Azul', 'Necesita personal', '20 cupos · 7 pendientes'],
-            ['Rescate de fauna', 'Confirmado', '8 cupos completos'],
-            ['Limpieza comunitaria', 'Necesita personal', '12 cupos · 2 pendientes']
-          ].map(([nombre, estado, detalle]) => `
-            <div class="rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
-              <p class="text-sm font-semibold">${nombre}</p>
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                ${detalle}
-              </p>
-              <span class="mt-2 inline-block rounded-md px-2 py-1 text-xs
-                ${estado === 'Confirmado'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-amber-100 text-amber-900'}">
-                ${estado}
-              </span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    if (listaTareas) {
-      listaTareas.innerHTML = `
-        <ul class="space-y-3 text-sm">
-          <li class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            ✓ Cubrir 7 cupos pendientes
-          </li>
-          <li class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            ✓ Revisar asistencia
-          </li>
-          <li class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-            ✓ Confirmar responsables
-          </li>
-        </ul>
-      `;
+  async function cargarReales() {
+    resumen(null);
+    try {
+      const r = await fetch('http://localhost:3006/api/volunturno/estado');
+      if (!r.ok) throw new Error('Error de conexión');
+      const datos = await r.json();
+      document.getElementById('total-turnos')!.textContent = String(datos.turnosRegistrados);
+      document.getElementById('total-personas')!.textContent = String(datos.usuariosRegistrados);
+      if (turnos) turnos.textContent = t(datos.turnosRegistrados === 0 ? 'dashboard.noShiftsYet' : 'dashboard.hasShifts');
+      if (tareas) tareas.textContent = t('dashboard.tasksLater');
+      if (aviso) aviso.textContent = t('dashboard.realDataInfo');
+    } catch {
+      if (turnos) turnos.textContent = t('dashboard.backendUnavailable');
+      if (tareas) tareas.textContent = t('dashboard.expressCheck');
+      if (aviso) aviso.textContent = t('dashboard.realFetchError');
     }
   }
 
   function cambiarEstado(estado: string) {
-    if (aviso) {
-      aviso.textContent = estado === 'real'
-        ? 'Consultando datos reales de VolunTurno.'
-        : 'Modo demostración: los datos de esta vista son simulados y no modifican MySQL.';
-    }
-
-    if (estado === 'ideal') {
-      mostrarIdeal();
-      return;
-    }
-
-    if (estado === 'empty') {
-      mostrarVacio();
-      return;
-    }
-
+    if (aviso) aviso.textContent = t(estado === 'real' ? 'dashboard.fetchingReal' : 'dashboard.demoNotice');
+    if (estado === 'ideal') return mostrarIdeal();
+    if (estado === 'empty') return mostrarVacio();
     if (estado === 'loading') {
-      mostrarResumen(null);
-      if (listaTurnos) listaTurnos.textContent = 'Cargando turnos...';
-      if (listaTareas) listaTareas.textContent = 'Cargando tareas...';
+      resumen(null);
+      if (turnos) turnos.textContent = t('dashboard.loadingShifts');
+      if (tareas) tareas.textContent = t('dashboard.loadingTasks');
       return;
     }
-
     if (estado === 'partial') {
-      mostrarResumen({ ...resumenFigma, asistencias: 0 });
-      if (listaTurnos) {
-        listaTurnos.textContent =
-          'Información parcial: algunos turnos aún requieren asignaciones.';
-      }
-      if (listaTareas) {
-        listaTareas.textContent =
-          'Hay tareas pendientes de completar.';
-      }
+      resumen({ ...ejemplo, asistencias: 0 });
+      if (turnos) turnos.textContent = t('dashboard.partialShifts');
+      if (tareas) tareas.textContent = t('dashboard.partialTasks');
       return;
     }
-
     if (estado === 'error') {
-      mostrarResumen(null);
-      if (listaTurnos) {
-        listaTurnos.textContent =
-          'No se pudo cargar la información de turnos.';
-      }
-      if (listaTareas) {
-        listaTareas.textContent =
-          'Error al consultar las tareas.';
-      }
+      resumen(null);
+      if (turnos) turnos.textContent = t('dashboard.errorShifts');
+      if (tareas) tareas.textContent = t('dashboard.errorTasks');
       return;
     }
-
-    // El endpoint actual solo entrega usuarios y turnos totales.
-    // No debemos inventar los otros indicadores.
-    cargarDatosReales();
+    void cargarReales();
   }
 
-  async function cargarDatosReales() {
-    mostrarResumen(null);
-
-    try {
-      const respuesta = await fetch(
-        'http://localhost:3006/api/volunturno/estado'
-      );
-
-      if (!respuesta.ok) throw new Error('Error de conexión');
-
-      const datos = await respuesta.json();
-
-      // Solo mostramos datos que la API realmente proporciona.
-      const turnos = document.getElementById('total-turnos');
-      const personas = document.getElementById('total-personas');
-
-      if (turnos) turnos.textContent = String(datos.turnosRegistrados);
-      if (personas) personas.textContent = String(datos.usuariosRegistrados);
-
-      if (listaTurnos) {
-        listaTurnos.textContent = datos.turnosRegistrados === 0
-          ? 'Todavía no se han registrado turnos. Puedes crear el primero.'
-          : 'Hay turnos registrados. El listado detallado se conectará con el módulo Calendario.';
-      }
-
-      if (listaTareas) {
-        listaTareas.textContent =
-          'Las tareas prioritarias se mostrarán cuando conectemos las asignaciones y asistencias.';
-      }
-
-      if (aviso) {
-        aviso.textContent =
-          'Datos reales: usuarios y turnos registrados. Los demás indicadores requieren consultas adicionales.';
-      }
-
-    } catch {
-      if (listaTurnos) listaTurnos.textContent = 'No se pudo conectar al backend.';
-      if (listaTareas) listaTareas.textContent = 'Comprueba que Express esté funcionando.';
-      if (aviso) aviso.textContent = 'Error al consultar los datos reales.';
-    }
+  function formatosRegionales() {
+    const ejemplo = new Date(2026, 10, 16, 14, 30); // Fecha fija de muestra.
+    const fecha = document.querySelector<HTMLElement>('#formato-fecha');
+    const hora = document.querySelector<HTMLElement>('#formato-hora');
+    const moneda = document.querySelector<HTMLElement>('#formato-moneda');
+    if (fecha) fecha.textContent = formatoFecha(ejemplo);
+    if (hora) hora.textContent = formatoHora(ejemplo);
+    if (moneda) moneda.textContent = formatoMoneda(1250.50);
   }
 
-  selector?.addEventListener('change', () => {
-    cambiarEstado(selector.value);
+  formatosRegionales();
+  selector?.addEventListener('change', () => cambiarEstado(selector.value));
+  document.addEventListener('volunturno:idioma', () => {
+    formatosRegionales();
+    if (autenticado) cambiarEstado(selector?.value ?? 'real');
   });
-
-  // Cargar únicamente después de validar la sesión.
   document.addEventListener('volunturno:autorizado', () => {
+    autenticado = true;
     cambiarEstado(selector?.value ?? 'real');
   }, { once: true });
 </script>

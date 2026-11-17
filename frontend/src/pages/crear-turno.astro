@@ -12,33 +12,33 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
   >
     <!-- ESTADOS DE INTERFAZ -->
     <div class="mb-3 flex flex-wrap items-center gap-3">
-      <label for="vista" class="text-sm font-medium">
+      <label for="vista" class="text-sm font-medium" data-i18n="shift.view">
         Vista de estados:
       </label>
       <select id="vista" class="campo-select">
-        <option value="real">Datos reales · MySQL</option>
-        <option value="ideal">Ideal · Ejemplo Figma</option>
-        <option value="empty">Empty · Vacío</option>
-        <option value="partial">Partial · Parcial</option>
-        <option value="loading">Loading · Cargando</option>
-        <option value="error">Error · Recuperación</option>
+        <option value="real" data-i18n="shift.real">Datos reales · MySQL</option>
+        <option value="ideal" data-i18n="shift.ideal">Ideal · Ejemplo Figma</option>
+        <option value="empty" data-i18n="shift.empty">Empty · Vacío</option>
+        <option value="partial" data-i18n="shift.partial">Partial · Parcial</option>
+        <option value="loading" data-i18n="shift.loading">Loading · Cargando</option>
+        <option value="error" data-i18n="shift.error">Error · Recuperación</option>
       </select>
       <p id="origen" role="status"
-         class="text-xs text-emerald-700 dark:text-emerald-400">
+         class="text-xs text-emerald-700 dark:text-emerald-400" data-i18n="shift.realNote">
         Modo real: los cambios pueden guardarse en MySQL.
       </p>
     </div>
 
     <!-- INDICADORES DE LOS TRES PASOS -->
-    <nav aria-label="Pasos para crear un turno" class="mb-3">
+    <nav aria-label="Pasos para crear un turno" data-i18n-aria-label="shift.stepsNav" class="mb-3">
       <ol class="grid gap-2 sm:grid-cols-3">
-        <li><span id="indicador-1" aria-current="step" class="indicador activo">
+        <li><span id="indicador-1" aria-current="step" class="indicador activo" data-i18n="shift.step1">
           1 Información general
         </span></li>
-        <li><span id="indicador-2" class="indicador">
+        <li><span id="indicador-2" class="indicador" data-i18n="shift.step2">
           2 Personal y funciones
         </span></li>
-        <li><span id="indicador-3" class="indicador">
+        <li><span id="indicador-3" class="indicador" data-i18n="shift.step3">
           3 Revisar y publicar
         </span></li>
       </ol>
@@ -55,7 +55,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
                   dark:bg-slate-900 sm:p-6">
 
         <div id="cargando" hidden role="status" class="space-y-4">
-          <p class="font-semibold">Cargando información...</p>
+          <p class="font-semibold" data-i18n="shift.loadingInfo">Cargando información...</p>
           <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
           <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
           <div class="h-10 rounded bg-slate-200 dark:bg-slate-700"></div>
@@ -64,7 +64,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
         <!-- CONFIRMACIÓN DEL SERVIDOR -->
         <section id="resultado" hidden tabindex="-1">
           <div class="mb-4 text-4xl text-emerald-700" aria-hidden="true">✓</div>
-          <h2 id="resultado-titulo" class="text-xl font-bold">
+          <h2 id="resultado-titulo" class="text-xl font-bold" data-i18n="shift.saved">
             Turno guardado
           </h2>
           <p id="resultado-mensaje" class="mt-3 text-sm"></p>
@@ -72,11 +72,11 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
           <div class="mt-6 flex flex-wrap gap-2">
             <a id="ver-calendario" href="/calendario"
-               class="boton-primario">
+               class="boton-primario" data-i18n="shift.viewCalendar">
               Ver en calendario
             </a>
             <button id="crear-otro" type="button"
-                    class="boton-secundario">
+                    class="boton-secundario" data-i18n="shift.createAnother">
               Crear otro turno
             </button>
           </div>
@@ -86,41 +86,41 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
           <!-- PASO 1 -->
           <section id="paso-1" aria-labelledby="titulo-1">
-            <h2 id="titulo-1" tabindex="-1" class="text-lg font-bold">
+            <h2 id="titulo-1" tabindex="-1" class="text-lg font-bold" data-i18n="shift.general">
               Información general
             </h2>
-            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.generalHelp">
               Define qué actividad se realizará, dónde y en qué horario.
             </p>
 
             <div class="space-y-4">
               <div>
-                <label for="actividad" class="etiqueta">Actividad *</label>
+                <label for="actividad" class="etiqueta" data-i18n="shift.activityRequired">Actividad *</label>
                 <input id="actividad" class="campo" type="text"
                        required minlength="5" maxlength="120"
-                       placeholder="Reforestación · Cerro Azul" />
+                       placeholder="Reforestación · Cerro Azul" data-i18n-placeholder="shift.exampleActivity" />
               </div>
 
               <div>
-                <label for="lugar" class="etiqueta">Lugar *</label>
+                <label for="lugar" class="etiqueta" data-i18n="shift.placeRequired">Lugar *</label>
                 <input id="lugar" class="campo" type="text"
                        required minlength="5" maxlength="200"
-                       placeholder="Sector Cerro Azul, Abancay" />
+                       placeholder="Sector Cerro Azul, Abancay" data-i18n-placeholder="shift.examplePlace" />
               </div>
 
               <div class="grid gap-3 sm:grid-cols-[1.2fr_1fr_1fr]">
                 <div>
-                  <label for="fecha" class="etiqueta">Fecha *</label>
+                  <label for="fecha" class="etiqueta" data-i18n="shift.dateRequired">Fecha *</label>
                   <input id="fecha" class="campo" type="date" required />
                 </div>
 
                 <div>
-                  <label for="inicio" class="etiqueta">Hora de inicio *</label>
+                  <label for="inicio" class="etiqueta" data-i18n="shift.startRequired">Hora de inicio *</label>
                   <input id="inicio" class="campo" type="time" required />
                 </div>
 
                 <div>
-                  <label for="fin" class="etiqueta">Hora de fin *</label>
+                  <label for="fin" class="etiqueta" data-i18n="shift.endRequired">Hora de fin *</label>
                   <input id="fin" class="campo" type="time" required />
                 </div>
               </div>
@@ -130,10 +130,10 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
             <div class="mt-7 flex flex-wrap items-center justify-between
                         gap-3 border-t border-slate-200 pt-4
                         dark:border-slate-700">
-              <p class="text-xs text-slate-600 dark:text-slate-300">
+              <p class="text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.nextTip">
                 Siguiente: configurar cupos y responsable.
               </p>
-              <button id="siguiente-1" type="button" class="boton-primario">
+              <button id="siguiente-1" type="button" class="boton-primario" data-i18n="shift.next">
                 Siguiente →
               </button>
             </div>
@@ -141,16 +141,16 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
           <!-- PASO 2 -->
           <section id="paso-2" hidden aria-labelledby="titulo-2">
-            <h2 id="titulo-2" tabindex="-1" class="text-lg font-bold">
+            <h2 id="titulo-2" tabindex="-1" class="text-lg font-bold" data-i18n="shift.staff">
               Personal y funciones
             </h2>
-            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.staffHelp">
               Define cuántas personas necesitas y quién coordinará la actividad.
             </p>
 
             <div class="grid gap-3 sm:grid-cols-2">
               <div>
-                <label for="cupos" class="etiqueta">
+                <label for="cupos" class="etiqueta" data-i18n="shift.slotsRequired">
                   Cupos necesarios *
                 </label>
                 <input id="cupos" class="campo" type="number"
@@ -159,7 +159,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
               </div>
 
               <div>
-                <label for="responsable" class="etiqueta">
+                <label for="responsable" class="etiqueta" data-i18n="shift.responsible">
                   Responsable del turno
                 </label>
                 <input id="responsable" class="campo" type="text"
@@ -168,34 +168,34 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
             </div>
 
             <p id="ayuda-responsable"
-               class="mt-2 text-xs text-slate-600 dark:text-slate-300">
+               class="mt-2 text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.responsibleHelp">
               Se asigna automáticamente el coordinador autenticado.
             </p>
 
             <div class="mt-4">
-              <label for="funciones" class="etiqueta">
+              <label for="funciones" class="etiqueta" data-i18n="shift.functionsRequired">
                 Funciones y habilidades *
               </label>
               <textarea id="funciones" class="campo" rows="3"
                         required minlength="3" maxlength="500"
-                        placeholder="Plantación · primeros auxilios · logística"></textarea>
+                        placeholder="Plantación · primeros auxilios · logística" data-i18n-placeholder="shift.exampleFunctions"></textarea>
             </div>
 
             <div class="mt-5 rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
-              <h3 class="text-sm font-bold text-emerald-800 dark:text-emerald-300">
+              <h3 class="text-sm font-bold text-emerald-800 dark:text-emerald-300" data-i18n="shift.recommendation">
                 Recomendación
               </h3>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.recommendationHelp">
                 Indica las habilidades necesarias para que el equipo se prepare.
               </p>
             </div>
 
             <div class="mt-7 flex justify-between gap-3 border-t
                         border-slate-200 pt-4 dark:border-slate-700">
-              <button id="anterior-2" type="button" class="boton-secundario">
+              <button id="anterior-2" type="button" class="boton-secundario" data-i18n="shift.previous">
                 ← Anterior
               </button>
-              <button id="siguiente-2" type="button" class="boton-primario">
+              <button id="siguiente-2" type="button" class="boton-primario" data-i18n="shift.next">
                 Siguiente →
               </button>
             </div>
@@ -203,29 +203,29 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
           <!-- PASO 3 -->
           <section id="paso-3" hidden aria-labelledby="titulo-3">
-            <h2 id="titulo-3" tabindex="-1" class="text-lg font-bold">
+            <h2 id="titulo-3" tabindex="-1" class="text-lg font-bold" data-i18n="shift.review">
               Revisar y publicar
             </h2>
-            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300">
+            <p class="mb-5 mt-1 text-xs text-slate-600 dark:text-slate-300" data-i18n="shift.reviewHelp">
               Comprueba la información antes de confirmar el turno.
             </p>
 
             <h3 class="mb-3 text-xs font-bold uppercase text-slate-600
-                       dark:text-slate-300">
+                       dark:text-slate-300" data-i18n="shift.general">
               Información general
             </h3>
 
             <dl class="space-y-3 text-sm">
               <div class="fila-revision">
-                <dt>Actividad</dt>
+                <dt data-i18n="shift.activity">Actividad</dt>
                 <dd id="rev-actividad"></dd>
               </div>
               <div class="fila-revision">
-                <dt>Lugar</dt>
+                <dt data-i18n="shift.place">Lugar</dt>
                 <dd id="rev-lugar"></dd>
               </div>
               <div class="fila-revision">
-                <dt>Fecha y horario</dt>
+                <dt data-i18n="shift.dateTime">Fecha y horario</dt>
                 <dd id="rev-fecha"></dd>
               </div>
             </dl>
@@ -233,41 +233,41 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
             <hr class="my-5 border-slate-200 dark:border-slate-700" />
 
             <h3 class="mb-3 text-xs font-bold uppercase text-slate-600
-                       dark:text-slate-300">
+                       dark:text-slate-300" data-i18n="shift.staff">
               Personal y funciones
             </h3>
 
             <dl class="space-y-3 text-sm">
               <div class="fila-revision">
-                <dt>Cupos</dt>
+                <dt data-i18n="shift.slots">Cupos</dt>
                 <dd id="rev-cupos"></dd>
               </div>
               <div class="fila-revision">
-                <dt>Responsable</dt>
+                <dt data-i18n="shift.responsibleShort">Responsable</dt>
                 <dd id="rev-responsable"></dd>
               </div>
               <div class="fila-revision">
-                <dt>Funciones</dt>
+                <dt data-i18n="shift.functions">Funciones</dt>
                 <dd id="rev-funciones"></dd>
               </div>
             </dl>
 
             <p class="mt-5 rounded-lg bg-emerald-50 p-3
                       text-xs font-medium text-emerald-900
-                      dark:bg-emerald-950 dark:text-emerald-200">
+                      dark:bg-emerald-950 dark:text-emerald-200" data-i18n="shift.ready">
               ✓ La información está lista para revisión final.
             </p>
 
             <div class="mt-4 flex flex-wrap justify-between gap-2">
-              <button id="editar" type="button" class="boton-secundario">
+              <button id="editar" type="button" class="boton-secundario" data-i18n="shift.edit">
                 ← Editar datos
               </button>
 
               <div class="flex flex-wrap gap-2">
-                <button id="borrador" type="button" class="boton-secundario">
+                <button id="borrador" type="button" class="boton-secundario" data-i18n="shift.saveDraft">
                   Guardar borrador
                 </button>
-                <button id="cancelar-creacion" type="button" class="boton-secundario">
+                <button id="cancelar-creacion" type="button" class="boton-secundario" data-i18n="shift.cancel">
                   Cancelar creación
                 </button>
                 <BotonConfirmacionMultimodal
@@ -290,7 +290,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       <aside aria-label="Resumen y consejos del turno"
              class="rounded-xl bg-emerald-50 p-5 text-emerald-950
                     dark:bg-slate-900 dark:text-slate-100">
-        <h2 id="titulo-lateral" class="font-bold">Consejo</h2>
+        <h2 id="titulo-lateral" class="font-bold" data-i18n="shift.advice">Consejo</h2>
         <p id="consejo-lateral" class="mt-2 text-sm leading-relaxed">
           Completa primero los datos básicos. La fecha y las horas
           ayudarán a evitar conflictos.
@@ -298,14 +298,14 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
         <hr class="my-4 border-emerald-200 dark:border-slate-700" />
 
-        <h3 class="mb-2 text-xs font-bold">Resumen del turno</h3>
-        <p id="resumen-nombre" class="break-words text-sm font-semibold">
+        <h3 class="mb-2 text-xs font-bold" data-i18n="shift.summary">Resumen del turno</h3>
+        <p id="resumen-nombre" class="break-words text-sm font-semibold" data-i18n="shift.withoutActivity">
           Sin actividad
         </p>
-        <p id="resumen-fecha" class="mt-1 text-xs">
+        <p id="resumen-fecha" class="mt-1 text-xs" data-i18n="shift.withoutDate">
           Sin fecha y horario
         </p>
-        <p id="resumen-cupos" class="mt-2 text-sm font-semibold">
+        <p id="resumen-cupos" class="mt-2 text-sm font-semibold" data-i18n="shift.withoutSlots">
           Cupos sin definir
         </p>
         <p id="resumen-responsable" class="mt-1 text-xs">
@@ -313,7 +313,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
         </p>
         <span id="etiqueta-estado"
               class="mt-3 inline-flex rounded-md bg-amber-100
-                     px-3 py-1 text-xs font-bold text-amber-950">
+                     px-3 py-1 text-xs font-bold text-amber-950" data-i18n="shift.draftUnsaved">
           Borrador sin guardar
         </span>
       </aside>
@@ -365,6 +365,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
   }
 
   .indicador {
+    overflow-wrap: anywhere;
     display: block;
     border-radius: 8px;
     padding: 12px;
@@ -451,6 +452,8 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 </style>
 
 <script>
+  import { traducir as t, formatoFecha, aplicarTraducciones } from '../utils/i18n';
+
   const campo = (id: string) =>
     document.getElementById(id) as HTMLInputElement;
 
@@ -462,7 +465,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
   const fecha = campo('fecha');
   const inicio = campo('inicio');
   const fin = campo('fin');
-  const cupos = campo('cupos');
+  const cupos = campo(t('shift.slotsN'));
   const responsable = campo('responsable');
 
   const funciones =
@@ -501,6 +504,8 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
   let autorizado = false;
   let guardando = false;
   let nombreCoordinador = '';
+  // Último estado guardado, para conservarlo al cambiar de idioma.
+  let estadoGuardado: 'borrador' | 'publicado' | null = null;
 
   function hoyPeru() {
     const partes = new Intl.DateTimeFormat('en-US', {
@@ -535,17 +540,17 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   function resumen() {
     elemento('resumen-nombre').textContent =
-      actividad.value.trim() || 'Sin actividad';
+      actividad.value.trim() || t('shift.withoutActivity');
 
     elemento('resumen-fecha').textContent = fecha.value
-      ? `${fecha.value} · ${inicio.value || '--:--'}–${fin.value || '--:--'}`
-      : 'Sin fecha y horario';
+      ? `${formatoFecha(new Date(fecha.value + 'T12:00:00'))} · ${inicio.value || '--:--'}–${fin.value || '--:--'}`
+      : t('shift.withoutDate');
 
     elemento('resumen-cupos').textContent =
-      cupos.value ? `${cupos.value} cupos` : 'Cupos sin definir';
+      cupos.value ? `${cupos.value} ${t('shift.slotsN')}` : t('shift.withoutSlots');
 
     elemento('resumen-responsable').textContent =
-      `Responsable: ${responsable.value || 'pendiente'}`;
+      `${t('shift.responsiblePrefix')} ${responsable.value || t('shift.pending')}`;
   }
 
   function mostrarPaso(numero: number) {
@@ -564,13 +569,13 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       }
     }
 
-    elemento('numero-paso').textContent = `Paso ${numero} de 3`;
+    elemento('numero-paso').textContent = t('shift.stepCounter').replace('{n}',String(numero));
 
-    const titulos = ['Consejo', 'Equipo requerido', 'Todo listo'];
+    const titulos = [t('shift.advice'), t('shift.adviceStaff'), t('shift.adviceReady')];
     const consejos = [
-      'Completa primero los datos básicos. La fecha y las horas ayudarán a evitar conflictos.',
-      'Indica las funciones necesarias para que el equipo se prepare.',
-      'Comprueba los datos y elige Guardar borrador o Publicar turno.'
+      t('shift.adviceGeneral'),
+      t('shift.adviceStaffText'),
+      t('shift.adviceReadyText')
     ];
 
     elemento('titulo-lateral').textContent = titulos[numero - 1];
@@ -597,20 +602,20 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   function validarPaso1() {
     if (!validarCampos([actividad, lugar, fecha, inicio, fin])) {
-      informarMultimodal('error', 'Revisa los campos obligatorios del primer paso.');
+      informarMultimodal('error', t('shift.reviewStep1Error'));
       return false;
     }
 
     if (fecha.value < hoyPeru()) {
-      mensaje('La fecha no puede estar en el pasado.');
-      informarMultimodal('error', 'La fecha no puede estar en el pasado.');
+      mensaje(t('shift.datePast'));
+      informarMultimodal('error', t('shift.datePast'));
       fecha.focus();
       return false;
     }
 
     if (fin.value <= inicio.value) {
-      mensaje('La hora de fin debe ser posterior a la hora de inicio.');
-      informarMultimodal('error', 'La hora de fin debe ser posterior a la hora de inicio.');
+      mensaje(t('shift.endAfterStart'));
+      informarMultimodal('error', t('shift.endAfterStart'));
       fin.focus();
       return false;
     }
@@ -620,7 +625,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   function validarPaso2() {
     if (!validarCampos([cupos, funciones])) {
-      informarMultimodal('error', 'Revisa los cupos y las funciones del segundo paso.');
+      informarMultimodal('error', t('shift.reviewStep2Error'));
       return false;
     }
 
@@ -628,15 +633,15 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
     if (!Number.isInteger(cantidad) ||
         cantidad < 1 || cantidad > 500) {
-      mensaje('Los cupos deben ser un entero entre 1 y 500.');
-      informarMultimodal('error', 'Los cupos deben ser un entero entre 1 y 500.');
+      mensaje(t('shift.slotsRange'));
+      informarMultimodal('error', t('shift.slotsRange'));
       cupos.focus();
       return false;
     }
 
     if (!responsable.value) {
-      mensaje('No se identificó al coordinador autenticado.');
-      informarMultimodal('error', 'No se identificó al coordinador autenticado.');
+      mensaje(t('shift.notCoordinator'));
+      informarMultimodal('error', t('shift.notCoordinator'));
       return false;
     }
 
@@ -648,8 +653,8 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       'rev-actividad': actividad.value,
       'rev-lugar': lugar.value,
       'rev-fecha':
-        `${fecha.value} · ${inicio.value}–${fin.value}`,
-      'rev-cupos': `${cupos.value} personas`,
+        `${formatoFecha(new Date(fecha.value + 'T12:00:00'))} · ${inicio.value}–${fin.value}`,
+      'rev-cupos': `${cupos.value} ${t('shift.persons')}`,
       'rev-responsable': responsable.value,
       'rev-funciones': funciones.value
     };
@@ -710,14 +715,14 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
   // EJEMPLO DEL PROTOTIPO FIGMA
   function cargarEjemplo() {
-    actividad.value = 'Reforestación · Cerro Azul';
-    lugar.value = 'Sector Cerro Azul, Abancay';
+    actividad.value = t('shift.exampleActivity');
+    lugar.value = t('shift.examplePlace');
     fecha.value = '2026-10-19';
     inicio.value = '08:00';
     fin.value = '12:00';
     cupos.value = '20';
     responsable.value = 'José de la Cuba (ejemplo Figma)';
-    funciones.value = 'Plantación · primeros auxilios · logística';
+    funciones.value = t('shift.exampleFunctions');
   }
 
   function cambiarVista() {
@@ -727,40 +732,41 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
     elemento('cargando').hidden = true;
 
     formulario.reset();
+    estadoGuardado = null;
     responsable.value = nombreCoordinador;
 
     elemento('etiqueta-estado').textContent =
-      'Borrador sin guardar';
+      t('shift.draftUnsaved');
 
     mostrarPaso(1);
 
     const estado = vista.value;
 
     elemento('origen').textContent = estado === 'real'
-      ? 'Modo real: los cambios pueden guardarse en MySQL.'
-      : 'Demostración UI Stack: no se guardarán datos en MySQL.';
+      ? t('shift.realNote')
+      : t('shift.demoNote');
 
     if (estado === 'ideal') {
       cargarEjemplo();
     }
 
     if (estado === 'partial') {
-      actividad.value = 'Reforestación · Cerro Azul';
-      lugar.value = 'Sector Cerro Azul, Abancay';
+      actividad.value = t('shift.exampleActivity');
+      lugar.value = t('shift.examplePlace');
 
       mensaje(
-        'Estado Partial: faltan fecha, horario, cupos y funciones.',
+        t('shift.partialText'),
         false
       );
     }
 
     if (estado === 'empty') {
-      mensaje('Estado Empty: completa los campos para comenzar.', false);
+      mensaje(t('shift.emptyText'), false);
     }
 
     if (estado === 'error') {
       mensaje(
-        'Estado Error simulado: no se pudieron recuperar sugerencias.',
+        t('shift.errorText'),
         true
       );
     }
@@ -781,15 +787,15 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
     if (modoDemostracion()) {
       mensaje(
-        'Selecciona Datos reales · MySQL para guardar o publicar.'
+        t('shift.useReal')
       );
-      informarMultimodal('error', 'Selecciona Datos reales · MySQL.');
+      informarMultimodal('error', t('shift.useRealShort'));
       return;
     }
 
     if (!autorizado) {
-      mensaje('Primero debes iniciar sesión como coordinador.');
-      informarMultimodal('error', 'Inicia sesión como coordinador.');
+      mensaje(t('shift.loginFirst'));
+      informarMultimodal('error', t('shift.loginShort'));
       return;
     }
 
@@ -806,19 +812,19 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
     guardando = true;
     // La solicitud ya pasó las validaciones y va a enviarse a Express.
     if (estado === 'publicado') {
-      informarMultimodal('progreso', 'Publicando el turno en MySQL...');
+      informarMultimodal('progreso', t('shift.publishing'));
     }
     publicar.disabled = true;
     borrador.disabled = true;
 
     textoPublicar(
-      estado === 'publicado' ? 'Publicando...' : 'Publicar turno'
+      estado === 'publicado' ? t('shift.publishingShort') : t('shift.publish')
     );
 
     borrador.textContent =
-      estado === 'borrador' ? 'Guardando...' : 'Guardar borrador';
+      estado === 'borrador' ? t('shift.saving') : t('shift.saveDraft');
 
-    mensaje('Guardando el turno en MySQL...', false);
+    mensaje(t('shift.savingMysql'), false);
 
     const datos = {
       titulo: actividad.value.trim(),
@@ -853,13 +859,13 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
       if (!respuesta.ok) {
         throw new Error(
-          resultado.mensaje || 'No se pudo guardar el turno.'
+          resultado.mensaje || t('shift.saveFailed')
         );
       }
 
       // La respuesta exitosa del servidor confirma el guardado.
       if (estado === 'publicado') {
-        informarMultimodal('exito', 'El turno se publicó correctamente en MySQL.');
+        informarMultimodal('exito', t('shift.publishedMysql'));
       }
 
       formulario.hidden = true;
@@ -868,18 +874,19 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
 
       elemento('resultado-titulo').textContent =
         estado === 'publicado'
-          ? 'Turno publicado'
-          : 'Borrador guardado';
+          ? t('shift.published')
+          : t('shift.draftSaved');
 
       elemento('resultado-mensaje').textContent = resultado.mensaje;
 
       elemento('resultado-id').textContent =
-        `Registro N.º ${resultado.turno.id_turno} · ${datos.titulo}`;
+        `${t('shift.record')} ${resultado.turno.id_turno} · ${datos.titulo}`;
 
+      estadoGuardado = estado;
       elemento('etiqueta-estado').textContent =
         estado === 'publicado'
-          ? 'Publicado ✓'
-          : 'Borrador guardado ✓';
+          ? t('shift.publishedCheck')
+          : t('shift.draftSavedCheck');
 
       const enlace =
         document.getElementById('ver-calendario') as HTMLAnchorElement;
@@ -892,7 +899,7 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
     } catch (error) {
       const descripcion = error instanceof Error
         ? error.message
-        : 'Error inesperado al guardar.';
+        : t('shift.unexpectedError');
       mensaje(descripcion);
       if (estado === 'publicado') informarMultimodal('error', descripcion);
 
@@ -902,8 +909,8 @@ import BotonConfirmacionMultimodal from '../components/BotonConfirmacionMultimod
       borrador.disabled = false;
       // El componente multimodal controla la etiqueta del botón
       // cuando el resultado es éxito o error.
-      if (estado === 'borrador') textoPublicar('Publicar turno');
-      borrador.textContent = 'Guardar borrador';
+      if (estado === 'borrador') textoPublicar(t('shift.publish'));
+      borrador.textContent = t('shift.saveDraft');
     }
   }
 
@@ -939,7 +946,7 @@ publicar.addEventListener('click', () => {
         );
 
         if (!respuesta.ok) {
-          throw new Error('Sesión no válida');
+          throw new Error(t('shift.loginInvalid'));
         }
 
         const datos = await respuesta.json();
@@ -969,7 +976,7 @@ publicar.addEventListener('click', () => {
 
       } catch {
         mensaje(
-          'No se pudo identificar al coordinador. Comprueba Express.'
+          t('shift.identifyError')
         );
       }
     },
@@ -978,6 +985,24 @@ publicar.addEventListener('click', () => {
 
   mostrarPaso(1);
   resumen();
+  aplicarTraducciones();
+
+  // Actualizar textos al cambiar idioma sin borrar datos ni cambiar el paso actual.
+  document.addEventListener('volunturno:idioma', () => {
+    aplicarTraducciones();
+    const titulos = [t('shift.advice'), t('shift.adviceStaff'), t('shift.adviceReady')];
+    const consejos = [t('shift.adviceGeneral'), t('shift.adviceStaffText'), t('shift.adviceReadyText')];
+    elemento('titulo-lateral').textContent = titulos[paso - 1];
+    elemento('consejo-lateral').textContent = consejos[paso - 1];
+    elemento('numero-paso').textContent = t('shift.stepCounter').replace('{n}', String(paso));
+    elemento('etiqueta-estado').textContent = estadoGuardado === 'publicado' ? t('shift.publishedCheck') : estadoGuardado === 'borrador' ? t('shift.draftSavedCheck') : t('shift.draftUnsaved');
+    elemento('resultado-titulo').textContent = estadoGuardado === 'publicado' ? t('shift.published') : estadoGuardado === 'borrador' ? t('shift.draftSaved') : t('shift.saved');
+    if (!guardando) textoPublicar(t('shift.publish'));
+    if (!guardando) borrador.textContent = t('shift.saveDraft');
+    elemento('origen').textContent = modoDemostracion() ? t('shift.demoNote') : t('shift.realNote');
+    if (paso === 3) actualizarRevision();
+    resumen();
+  });
 
 const cancelarCreacion = document.getElementById(
   'cancelar-creacion'
@@ -997,7 +1022,7 @@ cancelarCreacion?.addEventListener('click', () => {
   // Reproducir firma suave y descendente.
   informarMultimodal(
     'cancelacion',
-    'Creación del turno cancelada. No se guardaron cambios.'
+    t('shift.cancelMessage')
   );
 
   // Permitir que el usuario perciba la confirmación

@@ -1,9 +1,11 @@
 
 ---
+import PreferenciasUsuario from './PreferenciasUsuario.astro';
 interface Props {
   titulo: string;
   descripcion?: string;
-  pagina: 'dashboard' | 'calendario' | 'crear-turno';
+  // También acepta módulos futuros como Personal y Equipos.
+  pagina: string;
 }
 
 const { titulo, descripcion = '', pagina } = Astro.props;
@@ -28,17 +30,17 @@ const menu = [
     <aside
       class="hidden w-56 shrink-0 flex-col rounded-xl
              bg-[#103D32] p-4 text-white md:flex"
-      aria-label="Navegación principal"
+      aria-label="Navegación principal" data-i18n-aria-label="shell.navLabel"
     >
       <a href="/dashboard" class="mb-1 text-base font-bold">
         🌱 VolunTurno
       </a>
 
       <p class="mb-7 text-xs text-emerald-100">
-        Rescate Verde
+        <span data-i18n="shell.orgName">Rescate Verde</span>
       </p>
 
-      <nav aria-label="Módulos de VolunTurno" class="flex-1">
+      <nav aria-label="Módulos de VolunTurno" data-i18n-aria-label="shell.modulesLabel" class="flex-1">
         <ul class="space-y-1">
           {menu.map((item) => (
             <li>
@@ -59,7 +61,7 @@ const menu = [
                 <span aria-hidden="true" class="w-5 text-center">
                   {item.icono}
                 </span>
-                {item.nombre}
+                <span data-i18n={`shell.menu.${item.id}`}>{item.nombre}</span>
               </a>
             </li>
           ))}
@@ -72,7 +74,7 @@ const menu = [
         class="mt-6 rounded-lg border border-white/20
                px-3 py-2.5 text-sm hover:bg-white/10"
       >
-        Cerrar sesión
+        <span data-i18n="shell.logout">Cerrar sesión</span>
       </button>
     </aside>
 
@@ -87,48 +89,23 @@ const menu = [
       >
         <div>
           <p class="text-sm font-semibold">
-            Organización: Rescate Verde
+            <span data-i18n="shell.organization">Organización: Rescate Verde</span>
           </p>
           <p id="nombre-usuario" class="mt-1 text-xs text-slate-500
                                       dark:text-slate-400">
-            Verificando usuario...
+            <span data-i18n="shell.verifying">Verificando usuario...</span>
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
-          <!-- CAMBIO DE TEMA -->
-          <button
-            id="cambiar-tema"
-            type="button"
-            aria-label="Cambiar modo claro u oscuro"
-            aria-pressed="false"
-            class="rounded-lg border border-slate-200
-                   px-3 py-2 text-sm
-                   hover:bg-slate-100
-                   focus-visible:outline-2
-                   focus-visible:outline-emerald-600
-                   dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            <span id="icono-tema" aria-hidden="true">☾</span>
-            <span id="texto-tema" class="ml-1">Oscuro</span>
-          </button>
-
-          <div
-            class="flex h-9 w-9 items-center justify-center
-                   rounded-full bg-emerald-900 text-sm
-                   font-bold text-white"
-            aria-hidden="true"
-          >
-            <span id="inicial-usuario">U</span>
-          </div>
-        </div>
+        <!-- Avatar y menú desplegable: tema + idioma -->
+        <PreferenciasUsuario />
       </header>
 
       <!-- NAVEGACIÓN PARA MÓVILES -->
       <nav
         class="mb-4 flex gap-2 overflow-x-auto rounded-xl
                bg-white p-2 md:hidden dark:bg-slate-900"
-        aria-label="Navegación móvil"
+        aria-label="Navegación móvil" data-i18n-aria-label="shell.mobileLabel"
       >
         {menu.filter(item => item.ruta !== '#').map(item => (
           <a
@@ -141,7 +118,7 @@ const menu = [
                 : 'hover:bg-slate-100 dark:hover:bg-slate-800'
             ]}
           >
-            {item.nombre}
+            <span data-i18n={`shell.menu.${item.id}`}>{item.nombre}</span>
           </a>
         ))}
         <button
@@ -150,18 +127,18 @@ const menu = [
           class="shrink-0 rounded-lg px-3 py-2 text-sm
                  text-red-700 dark:text-red-300"
         >
-          Salir
+          <span data-i18n="shell.exit">Salir</span>
         </button>
       </nav>
 
       <!-- TÍTULO -->
       <div class="mb-5">
         <h1 class="text-2xl font-bold tracking-tight">
-          {titulo}
+          <span data-i18n={`shell.page.${pagina}.title`}>{titulo}</span>
         </h1>
         {descripcion && (
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            {descripcion}
+            <span data-i18n={`shell.page.${pagina}.description`}>{descripcion}</span>
           </p>
         )}
       </div>
@@ -172,39 +149,21 @@ const menu = [
       </main>
 
       <footer class="py-6 text-xs text-slate-500 dark:text-slate-400">
-        VolunTurno · Sistema de gestión de turnos y voluntarios
+        <span data-i18n="shell.footer">VolunTurno · Sistema de gestión de turnos y voluntarios</span>
       </footer>
     </div>
   </div>
 </div>
 
 <script>
-  // TEMA CLARO / OSCURO
-  const botonTema = document.querySelector<HTMLButtonElement>('#cambiar-tema');
-  const iconoTema = document.querySelector<HTMLElement>('#icono-tema');
-  const textoTema = document.querySelector<HTMLElement>('#texto-tema');
-
-  function aplicarTema(oscuro: boolean) {
-    document.documentElement.classList.toggle('dark', oscuro);
-
-    if (iconoTema) iconoTema.textContent = oscuro ? '☀' : '☾';
-    if (textoTema) textoTema.textContent = oscuro ? 'Claro' : 'Oscuro';
-
-    botonTema?.setAttribute('aria-pressed', String(oscuro));
-    localStorage.setItem('volunturno-tema', oscuro ? 'dark' : 'light');
+  import { traducir, aplicarTraducciones } from '../utils/i18n';
+  aplicarTraducciones();
+  let usuarioNombre = '';
+  function mostrarNombre() {
+    const elemento = document.querySelector<HTMLElement>('#nombre-usuario');
+    if (elemento && usuarioNombre) elemento.textContent = `${usuarioNombre} · ${traducir('shell.coordinator')}`;
   }
-
-  aplicarTema(
-    localStorage.getItem('volunturno-tema') === 'dark' ||
-    (
-      !localStorage.getItem('volunturno-tema') &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-    )
-  );
-
-  botonTema?.addEventListener('click', () => {
-    aplicarTema(!document.documentElement.classList.contains('dark'));
-  });
+  document.addEventListener('volunturno:idioma', mostrarNombre);
 
   // VERIFICAR SESIÓN Y ROL
   async function comprobarUsuario() {
@@ -234,9 +193,8 @@ const menu = [
       const nombre = document.querySelector<HTMLElement>('#nombre-usuario');
       const inicial = document.querySelector<HTMLElement>('#inicial-usuario');
 
-      if (nombre) {
-        nombre.textContent = `${usuario.nombre} ${usuario.apellido} · Coordinador`;
-      }
+      usuarioNombre = `${usuario.nombre} ${usuario.apellido}`.trim();
+      mostrarNombre();
 
       if (inicial) {
         inicial.textContent = usuario.nombre?.charAt(0).toUpperCase() || 'C';
@@ -246,7 +204,7 @@ const menu = [
 
     } catch {
       const nombre = document.querySelector<HTMLElement>('#nombre-usuario');
-      if (nombre) nombre.textContent = 'Error de conexión con el backend';
+      if (nombre) nombre.textContent = traducir('shell.connectionError');
     }
   }
 
@@ -264,7 +222,7 @@ const menu = [
 
       window.location.replace('/login');
     } catch {
-      alert('No se pudo cerrar la sesión. Intenta nuevamente.');
+      alert(traducir('shell.logoutError'));
     }
   }
 
