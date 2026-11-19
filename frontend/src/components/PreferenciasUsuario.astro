@@ -36,6 +36,22 @@
           <span id="icono-tema" aria-hidden="true">☾</span>
         </button>
       </div>
+      <!-- Actividad 18: acción funcional de alto contraste para baja visión y luz solar. -->
+      <div class="space-y-1">
+        <p class="text-sm font-semibold" data-i18n="preferences.accessibility">Accesibilidad</p>
+        <button
+          id="cambiar-contraste"
+          type="button"
+          aria-pressed="false"
+          class="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-slate-300 px-3 py-2 text-left text-sm font-semibold focus-visible:outline-2 focus-visible:outline-emerald-600 dark:border-slate-600"
+        >
+          <span id="texto-contraste">Alto contraste exterior: desactivado</span>
+          <span aria-hidden="true" id="icono-contraste">○</span>
+        </button>
+        <p class="text-xs text-slate-600 dark:text-slate-300" data-i18n="preferences.contrastHelp">
+          Facilita la lectura y el uso del teclado a plena luz.
+        </p>
+      </div>
       <div class="space-y-1">
         <label for="seleccionar-idioma" class="block text-sm font-semibold" data-i18n="preferences.language">Idioma de la interfaz</label>
         <select
@@ -61,6 +77,23 @@
   const botonTema = document.querySelector<HTMLButtonElement>('#cambiar-tema');
   const iconoTema = document.querySelector<HTMLElement>('#icono-tema');
   const textoTema = document.querySelector<HTMLElement>('#texto-tema');
+  const botonContraste = document.querySelector<HTMLButtonElement>('#cambiar-contraste');
+  const textoContraste = document.querySelector<HTMLElement>('#texto-contraste');
+  const iconoContraste = document.querySelector<HTMLElement>('#icono-contraste');
+
+  function actualizarContraste(activo: boolean) {
+    document.documentElement.classList.toggle('vt-alto-contraste', activo);
+    try { localStorage.setItem('volunturno-alto-contraste', String(activo)); }
+    catch { /* El modo sigue funcionando aun si el navegador bloquea el almacenamiento. */ }
+    botonContraste?.setAttribute('aria-pressed', String(activo));
+    if (textoContraste) textoContraste.textContent = traducir(activo
+      ? 'preferences.contrastOn' : 'preferences.contrastOff');
+    if (iconoContraste) iconoContraste.textContent = activo ? '●' : '○';
+  }
+  actualizarContraste(document.documentElement.classList.contains('vt-alto-contraste'));
+  botonContraste?.addEventListener('click', () => {
+    actualizarContraste(!document.documentElement.classList.contains('vt-alto-contraste'));
+  });
 
   function abrirMenu(visible: boolean) {
     if (!panel || !abrir) return;
@@ -82,13 +115,14 @@
 
   function aplicarTema(oscuro: boolean) {
     document.documentElement.classList.toggle('dark', oscuro);
-    localStorage.setItem('volunturno-tema', oscuro ? 'dark' : 'light');
+    try { localStorage.setItem('volunturno-tema', oscuro ? 'dark' : 'light'); }
+    catch { /* La apariencia sigue siendo utilizable sin almacenamiento. */ }
     botonTema?.setAttribute('aria-pressed', String(oscuro));
     if (iconoTema) iconoTema.textContent = oscuro ? '☀' : '☾';
     if (textoTema) textoTema.textContent = traducir(oscuro ? 'preferences.light' : 'preferences.dark');
   }
-  const preferencia = localStorage.getItem('volunturno-tema');
-  aplicarTema(preferencia === 'dark' || (preferencia === null && window.matchMedia('(prefers-color-scheme: dark)').matches));
+  // El Layout ya recuperó la preferencia global al abrir cualquier ruta.
+  aplicarTema(document.documentElement.classList.contains('dark'));
   botonTema?.addEventListener('click', () => aplicarTema(!document.documentElement.classList.contains('dark')));
 
   if (idioma) idioma.value = idiomaActual();
@@ -96,5 +130,9 @@
   idioma?.addEventListener('change', () => {
     establecerIdioma(idioma.value === 'en' ? 'en' : idioma.value === 'qu' ? 'qu' : 'es');
     aplicarTema(document.documentElement.classList.contains('dark'));
+    actualizarContraste(document.documentElement.classList.contains('vt-alto-contraste'));
+  });
+  document.addEventListener('volunturno:idioma', () => {
+    actualizarContraste(document.documentElement.classList.contains('vt-alto-contraste'));
   });
 </script>

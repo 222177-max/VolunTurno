@@ -1,3 +1,120 @@
-@import "tailwindcss";
-
+@import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ACTIVIDAD 18 — Exclusión / inclusión situacional y minimalismo funcional.
+   Funciona sobre todas las páginas; las preferencias se guardan localmente. */
+
+/* El enlace aparece solo cuando recibe el foco con Tab. */
+.vt-saltar {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 9999;
+  padding: 0.75rem 1rem;
+  transform: translateY(-180%);
+  background: #111827;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 0.25rem;
+  font-weight: 700;
+}
+.vt-saltar:focus,
+.vt-saltar:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+
+/* Indicación de foco útil para navegación sólo con teclado. */
+:where(button, a, input, select, textarea, [tabindex="0"]):focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+}
+
+
+/* La misma preferencia Claro/Oscuro también abarca inicio de sesión y cambio
+   de contraseña: ambos usan Layout pero no muestran el avatar antes del login. */
+html.dark:not(.vt-alto-contraste) body { color-scheme: dark; background: #020617; color: #f8fafc; }
+html.dark:not(.vt-alto-contraste) .vt-auth .bg-slate-50 { background-color: #020617; }
+html.dark:not(.vt-alto-contraste) .vt-auth .bg-white { background-color: #0f172a; }
+html.dark:not(.vt-alto-contraste) .vt-auth :is(.text-slate-900, .text-slate-800, .text-slate-700) { color: #f1f5f9; }
+html.dark:not(.vt-alto-contraste) .vt-auth :is(.text-slate-600, .text-slate-500) { color: #cbd5e1; }
+html.dark:not(.vt-alto-contraste) .vt-auth .text-emerald-800 { color: #6ee7b7; }
+html.dark:not(.vt-alto-contraste) .vt-auth :is(.border-slate-200, .border-slate-300) { border-color: #475569; }
+html.dark:not(.vt-alto-contraste) .vt-auth input:not([type="checkbox"]) {
+  background-color: #1e293b; color: #f8fafc; border-color: #64748b;
+}
+html.dark:not(.vt-alto-contraste) .vt-auth input::placeholder { color: #cbd5e1; }
+
+/* Estado de alto contraste exterior: evita depender del color, degrados o sombras. */
+html.vt-alto-contraste { color-scheme: light; }
+html.vt-alto-contraste body,
+html.vt-alto-contraste body * {
+  background-image: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html.vt-alto-contraste body :is(div, header, aside, nav, main, article, section, footer,
+  form, dialog, ul, ol, li, dl, dt, dd, .vt-dia, .vt-dia-contenido) {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+}
+html.vt-alto-contraste body,
+html.vt-alto-contraste body :is(h1, h2, h3, h4, p, span, strong, small, label, dt, dd, time) {
+  color: #111111 !important;
+}
+html.vt-alto-contraste body :is(h1, h2, h3, h4, label, .vt-turno-titulo) {
+  font-weight: 700 !important;
+}
+html.vt-alto-contraste body :is(button, a, input, textarea, select) {
+  min-height: 44px;
+  border: 2px solid #111111 !important;
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  font-size: max(1rem, 1em) !important;
+  font-weight: 700 !important;
+  opacity: 1;
+}
+html.vt-alto-contraste body :is(input, textarea, select)::placeholder {
+  color: #444444 !important;
+  opacity: 1;
+}
+html.vt-alto-contraste body :is(a, button):hover {
+  background-color: #e5e5e5 !important;
+}
+/* Acciones y opciones seleccionadas: blanco/negro; nunca solo diferencias de tono. */
+html.vt-alto-contraste body :is(.boton-primario, button[type="submit"], [aria-current="page"], .indicador.activo) {
+  background-color: #111111 !important;
+  border: 2px solid #111111 !important;
+  color: #ffffff !important;
+}
+html.vt-alto-contraste body :is(.boton-primario, button[type="submit"], [aria-current="page"], .indicador.activo) * {
+  color: #ffffff !important;
+}
+html.vt-alto-contraste body :is(.boton-primario, button[type="submit"], [aria-current="page"]):hover {
+  background-color: #303030 !important;
+}
+html.vt-alto-contraste body :is(button, a, input, textarea, select, [tabindex="0"]):focus-visible {
+  outline: 4px solid #e69f00 !important;
+  outline-offset: 3px !important;
+}
+html.vt-alto-contraste body :is(.vt-dia, .vt-dia-encabezado, .indicador, .fila-revision) {
+  border: 2px solid #111111 !important;
+}
+html.vt-alto-contraste body :is(.vt-turno-horario, #mensaje-calendario, [role="alert"], [role="status"]) {
+  font-weight: 700 !important;
+}
+html.vt-alto-contraste .vt-saltar,
+html.vt-alto-contraste .vt-saltar:focus-visible {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+html.vt-alto-contraste dialog::backdrop { background: rgba(0, 0, 0, 0.78); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

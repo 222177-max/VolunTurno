@@ -9,11 +9,35 @@ import AsistenteVozGlobal from '../components/AsistenteVozGlobal.astro';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Preferencias compartidas: restaurar ANTES del primer dibujo de cualquier página. -->
+    <script is:inline>
+      (() => {
+        const raiz = document.documentElement;
+        try {
+          const modo = localStorage.getItem('volunturno-tema');
+          const oscuro = modo === 'dark' ||
+            (modo === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          raiz.classList.toggle('dark', oscuro);
+          raiz.classList.toggle('vt-alto-contraste',
+            localStorage.getItem('volunturno-alto-contraste') === 'true');
+          const idioma = localStorage.getItem('volunturno-idioma');
+          raiz.lang = idioma === 'en' ? 'en-US' : idioma === 'qu' ? 'qu-PE' : 'es-PE';
+        } catch {
+          // El sistema sigue operativo si el almacenamiento está bloqueado.
+        }
+      })();
+    </script>
     <title>VolunTurno - Gestión de Voluntarios</title>
   </head>
   <body class="min-h-screen bg-slate-50 text-slate-900">
+    <!-- Primer elemento accesible por teclado: salta la navegación repetida. -->
+    <a class="vt-saltar" href="#contenido-principal">Saltar al contenido principal</a>
     <slot />
     <!-- Botón de micrófono disponible en todo VolunTurno -->
     <AsistenteVozGlobal />
+    <script>
+      import { aplicarTraducciones } from '../utils/i18n';
+      aplicarTraducciones();
+    </script>
   </body>
 </html>

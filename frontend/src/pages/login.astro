@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <main class="grid min-h-dvh lg:grid-cols-2">
+  <main id="contenido-principal" tabindex="-1" class="vt-auth grid min-h-dvh lg:grid-cols-2">
 
     <!-- ========================================= -->
     <!-- PANEL IZQUIERDO: PRESENTACIÓN DE VOLUNTURNO -->
@@ -14,29 +14,11 @@ import Layout from '../layouts/Layout.astro';
              bg-emerald-800 p-8 text-white lg:flex"
     >
 
-      <!-- LOGOTIPO -->
-      <div class="flex items-center gap-3">
-        <div
-          class="flex h-11 w-11 items-center justify-center
-                 rounded-xl bg-white/15 text-2xl"
-        >
-          🌱
-        </div>
-
-        <span class="text-xl font-bold">
-          VolunTurno
-        </span>
-      </div>
+      <!-- Identificación textual directa, sin icono decorativo. -->
+      <div class="text-xl font-bold">VolunTurno</div>
 
       <!-- PRESENTACIÓN -->
       <div class="my-6">
-
-        <span
-          class="inline-block rounded-full border border-white/20
-                 px-4 py-2 text-xs"
-        >
-          Gestión inteligente de voluntarios
-        </span>
 
         <h1
           class="mt-5 max-w-xl text-3xl font-bold
@@ -82,7 +64,7 @@ import Layout from '../layouts/Layout.astro';
             class="mb-4 text-2xl font-bold
                    text-emerald-800 lg:hidden"
           >
-            🌱 VolunTurno
+            VolunTurno
           </div>
 
           <h2
