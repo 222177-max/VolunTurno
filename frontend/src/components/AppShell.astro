@@ -3,7 +3,7 @@
 interface Props {
   titulo: string;
   descripcion?: string;
-  pagina: 'dashboard' | 'calendario' | 'crear-turno';
+  pagina: 'dashboard' | 'calendario' | 'crear-turno' | 'personal';
 }
 
 const { titulo, descripcion = '', pagina } = Astro.props;
@@ -12,7 +12,7 @@ const menu = [
   { nombre: 'Panel principal', ruta: '/dashboard', icono: '▦', id: 'dashboard' },
   { nombre: 'Calendario', ruta: '/calendario', icono: '▣', id: 'calendario' },
   { nombre: 'Crear turno', ruta: '/crear-turno', icono: '+', id: 'crear-turno' },
-  { nombre: 'Personal', ruta: '#', icono: '♙', id: 'personal' },
+  { nombre: 'Personal', ruta: '/personal', icono: '♙', id: 'personal' },
   { nombre: 'Equipos', ruta: '#', icono: '◇', id: 'equipos' },
   { nombre: 'Asistencia', ruta: '#', icono: '✓', id: 'asistencia' },
   { nombre: 'Organización', ruta: '#', icono: '⚙', id: 'organizacion' }

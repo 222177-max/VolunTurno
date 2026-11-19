@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import db from './config/db.mjs';
 import authRouter from './routes/auth.mjs';
 import turnosRouter from './routes/turnos.mjs';
+import personalRouter from './routes/personal.mjs';
+import asignacionesRouter from './routes/asignaciones.mjs';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -29,10 +31,24 @@ app.use(express.json({ limit: '100kb' }));
 // Leer cookies de sesión
 app.use(cookieParser());
 
-// Rutas de autenticación
+// ========================================
+// RUTAS DEL SISTEMA VOLUNTURNO
+// ========================================
+
+// Autenticación de usuarios
 app.use('/api/auth', authRouter);
+
+// Gestión de turnos
 app.use('/api/turnos', turnosRouter);
-// Ruta técnica de estado de VolunTurno
+
+// Gestión de personal (voluntarios)
+app.use('/api/personal', personalRouter);
+app.use('/api/asignaciones', asignacionesRouter);
+
+// ========================================
+// RUTA TÉCNICA DE ESTADO DE VOLUNTURNO
+// ========================================
+
 app.get('/api/volunturno/estado', async (req, res) => {
   try {
     const [usuarios] = await db.execute(
@@ -62,9 +78,13 @@ app.get('/api/volunturno/estado', async (req, res) => {
   }
 });
 
-// Iniciar backend
+// ========================================
+// INICIAR BACKEND
+// ========================================
+
 async function iniciarServidor() {
   try {
+    // Verificar conexión a MySQL
     await db.query('SELECT 1');
 
     app.listen(PORT, () => {
@@ -75,6 +95,8 @@ async function iniciarServidor() {
       console.log(`API: http://localhost:${PORT}`);
       console.log(`Estado: http://localhost:${PORT}/api/volunturno/estado`);
       console.log('Autenticación: configurada');
+      console.log('Turnos: configurados');
+      console.log('Personal (voluntarios): configurado');
       console.log('================================');
     });
 

@@ -1,0 +1,533 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+import AppShell from '../components/AppShell.astro';
+---
+
+<Layout>
+  <AppShell
+    titulo="Personal"
+    descripcion="Consulta y gestiona los voluntarios de Rescate Verde."
+    pagina="personal"
+  >
+    <section class="space-y-4">
+
+      <!-- ENCABEZADO -->
+      <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900">
+        <div>
+          <h2 class="text-lg font-semibold">Voluntarios registrados</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Consulta y registra voluntarios para las actividades.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button
+            id="actualizar-personal"
+            type="button"
+            class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 disabled:opacity-50"
+          >
+            Actualizar
+          </button>
+
+          <button
+            id="abrir-registro"
+            type="button"
+            class="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          >
+            + Registrar voluntario
+          </button>
+        </div>
+      </div>
+
+      <!-- LOADING, EMPTY Y ERROR -->
+      <div
+        id="estado-personal"
+        role="status"
+        aria-live="polite"
+        class="rounded-xl bg-white p-8 text-center shadow-sm dark:bg-slate-900"
+      >
+        <div class="mx-auto mb-4 h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"></div>
+        <p class="text-sm text-slate-600 dark:text-slate-300">
+          Cargando voluntarios...
+        </p>
+      </div>
+
+      <!-- TABLA -->
+      <div
+        id="tabla-personal"
+        class="hidden overflow-x-auto rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900"
+      >
+        <table class="w-full text-left text-sm">
+          <thead class="bg-emerald-50 text-slate-700 dark:bg-emerald-950 dark:text-slate-200">
+            <tr>
+              <th scope="col" class="p-3">Nombre</th>
+              <th scope="col" class="p-3">Correo</th>
+              <th scope="col" class="p-3">Teléfono</th>
+              <th scope="col" class="p-3">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="filas-personal"></tbody>
+        </table>
+      </div>
+
+      <!-- FORMULARIO DE REGISTRO -->
+      <div
+        id="panel-registro"
+        class="hidden rounded-xl bg-white p-5 shadow-sm dark:bg-slate-900"
+      >
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold">Registrar voluntario</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Completa los datos del nuevo integrante.
+            </p>
+          </div>
+          <button
+            id="cerrar-registro"
+            type="button"
+            class="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
+          >
+            Cerrar
+          </button>
+        </div>
+
+        <form id="form-registro" class="space-y-4">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="nombre" class="mb-1 block text-sm font-medium">Nombre</label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                required
+                minlength="2"
+                maxlength="100"
+                autocomplete="given-name"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="Lucía"
+              />
+            </div>
+
+            <div>
+              <label for="apellido" class="mb-1 block text-sm font-medium">Apellido</label>
+              <input
+                id="apellido"
+                name="apellido"
+                type="text"
+                required
+                minlength="2"
+                maxlength="100"
+                autocomplete="family-name"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="Quispe"
+              />
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="correo" class="mb-1 block text-sm font-medium">Correo electrónico</label>
+              <input
+                id="correo"
+                name="correo"
+                type="email"
+                required
+                maxlength="150"
+                autocomplete="off"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="voluntario@ejemplo.com"
+              />
+            </div>
+
+            <div>
+              <label for="telefono" class="mb-1 block text-sm font-medium">Teléfono (opcional)</label>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                maxlength="20"
+                autocomplete="tel"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="987654321"
+              />
+            </div>
+          </div>
+
+          <p class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+            El sistema generará una contraseña temporal. El voluntario deberá cambiarla al iniciar sesión.
+          </p>
+
+          <p
+            id="mensaje-registro"
+            role="status"
+            aria-live="polite"
+            class="hidden rounded-lg p-3 text-sm"
+          ></p>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              id="guardar-voluntario"
+              type="submit"
+              class="rounded-lg bg-emerald-700 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+            >
+              Guardar voluntario
+            </button>
+
+            <button
+              id="cancelar-registro"
+              type="button"
+              class="rounded-lg border border-slate-200 px-5 py-2 text-sm dark:border-slate-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- CONTRASEÑA TEMPORAL: MOSTRAR UNA SOLA VEZ -->
+      <div
+        id="resultado-registro"
+        class="hidden rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900 dark:bg-emerald-950"
+        role="status"
+        aria-live="polite"
+      >
+        <h2 class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
+          Voluntario registrado correctamente
+        </h2>
+
+        <p class="mt-2 text-sm text-emerald-900 dark:text-emerald-200">
+          Entrega estos datos de acceso al voluntario por un canal privado.
+          La contraseña temporal no se volverá a mostrar.
+        </p>
+
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Correo</p>
+            <p id="correo-generado" class="break-all font-medium"></p>
+          </div>
+
+          <div>
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+              Contraseña temporal
+            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-2">
+              <code
+                id="password-generado"
+                class="break-all rounded-lg bg-white px-3 py-2 text-sm text-slate-900 dark:bg-slate-800 dark:text-white"
+              ></code>
+              <button
+                id="copiar-password"
+                type="button"
+                class="rounded-lg border border-emerald-300 px-3 py-2 text-sm dark:border-emerald-700"
+              >
+                Copiar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button
+          id="ocultar-credenciales"
+          type="button"
+          class="mt-4 rounded-lg bg-emerald-700 px-4 py-2 text-sm text-white"
+        >
+          Ya guardé los datos de acceso
+        </button>
+      </div>
+
+    </section>
+  </AppShell>
+</Layout>
+
+<script>
+  const API = 'http://localhost:3006';
+
+  const estado = document.querySelector<HTMLElement>('#estado-personal');
+  const tabla = document.querySelector<HTMLElement>('#tabla-personal');
+  const filas = document.querySelector<HTMLElement>('#filas-personal');
+  const actualizar = document.querySelector<HTMLButtonElement>('#actualizar-personal');
+
+  const abrir = document.querySelector<HTMLButtonElement>('#abrir-registro');
+  const cerrar = document.querySelector<HTMLButtonElement>('#cerrar-registro');
+  const cancelar = document.querySelector<HTMLButtonElement>('#cancelar-registro');
+  const panel = document.querySelector<HTMLElement>('#panel-registro');
+  const formulario = document.querySelector<HTMLFormElement>('#form-registro');
+  const guardar = document.querySelector<HTMLButtonElement>('#guardar-voluntario');
+  const mensaje = document.querySelector<HTMLElement>('#mensaje-registro');
+
+  const resultado = document.querySelector<HTMLElement>('#resultado-registro');
+  const correoGenerado = document.querySelector<HTMLElement>('#correo-generado');
+  const passwordGenerado = document.querySelector<HTMLElement>('#password-generado');
+  const copiar = document.querySelector<HTMLButtonElement>('#copiar-password');
+  const ocultar = document.querySelector<HTMLButtonElement>('#ocultar-credenciales');
+
+  let passwordTemporal = '';
+  let autorizado = false;
+
+  function mostrarEstado(
+    texto: string,
+    tipo: 'loading' | 'empty' | 'error' = 'empty'
+  ) {
+    if (!estado) return;
+
+    estado.classList.remove('hidden');
+    estado.replaceChildren();
+
+    const contenedor = document.createElement('div');
+    contenedor.className = 'flex flex-col items-center justify-center gap-3';
+
+    const icono = document.createElement('div');
+
+    if (tipo === 'loading') {
+      icono.className =
+        'h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600';
+    } else {
+      icono.className =
+        'flex h-12 w-12 items-center justify-center rounded-full text-xl ' +
+        (tipo === 'error'
+          ? 'bg-red-100 text-red-700 dark:bg-red-950'
+          : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950');
+      icono.textContent = tipo === 'error' ? '!' : '—';
+    }
+
+    const parrafo = document.createElement('p');
+    parrafo.textContent = texto;
+    parrafo.className =
+      tipo === 'error'
+        ? 'max-w-md text-sm font-medium text-red-700 dark:text-red-400'
+        : 'max-w-md text-sm text-slate-600 dark:text-slate-300';
+
+    contenedor.append(icono, parrafo);
+    estado.appendChild(contenedor);
+  }
+
+  function mostrarMensaje(texto: string, error = false) {
+    if (!mensaje) return;
+
+    mensaje.textContent = texto;
+    mensaje.className =
+      'rounded-lg p-3 text-sm ' +
+      (error
+        ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'
+        : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300');
+  }
+
+  function ocultarCredenciales() {
+    passwordTemporal = '';
+    if (passwordGenerado) passwordGenerado.textContent = '';
+    if (correoGenerado) correoGenerado.textContent = '';
+    resultado?.classList.add('hidden');
+  }
+
+  function cerrarFormulario() {
+    panel?.classList.add('hidden');
+    formulario?.reset();
+    mensaje?.classList.add('hidden');
+  }
+
+  async function cargarPersonal() {
+    if (!tabla || !filas) return;
+
+    tabla.classList.add('hidden');
+    mostrarEstado('Cargando voluntarios...', 'loading');
+
+    if (actualizar) actualizar.disabled = true;
+
+    try {
+      const respuesta = await fetch(`${API}/api/personal`, {
+        credentials: 'include',
+        cache: 'no-store'
+      });
+
+      if (respuesta.status === 401) {
+        throw new Error('Tu sesión ha vencido. Inicia sesión nuevamente.');
+      }
+
+      if (respuesta.status === 403) {
+        throw new Error('No tienes permisos para consultar el personal.');
+      }
+
+      if (!respuesta.ok) {
+        throw new Error('No se pudo consultar el personal.');
+      }
+
+      const datos = await respuesta.json();
+
+      if (datos.estado !== 'ok' || !Array.isArray(datos.personal)) {
+        throw new Error('El servidor devolvió una respuesta incorrecta.');
+      }
+
+      if (datos.personal.length === 0) {
+        filas.replaceChildren();
+        mostrarEstado(
+          'No hay voluntarios registrados. Registra voluntarios para comenzar a asignarlos.',
+          'empty'
+        );
+        return;
+      }
+
+      filas.replaceChildren();
+
+      for (const persona of datos.personal) {
+        const fila = document.createElement('tr');
+        fila.className =
+          'border-b border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50';
+
+        const valores = [
+          `${persona.nombre ?? ''} ${persona.apellido ?? ''}`.trim(),
+          persona.correo ?? '',
+          persona.telefono || 'No registrado'
+        ];
+
+        for (const valor of valores) {
+          const celda = document.createElement('td');
+          celda.className = 'p-3 text-slate-700 dark:text-slate-200';
+          celda.textContent = String(valor);
+          fila.appendChild(celda);
+        }
+
+        const celdaEstado = document.createElement('td');
+        celdaEstado.className = 'p-3';
+
+        const etiqueta = document.createElement('span');
+        etiqueta.className =
+          'inline-flex rounded-full px-3 py-1 text-xs font-semibold ' +
+          (persona.activo
+            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300');
+
+        etiqueta.textContent = persona.activo ? 'Activo' : 'Inactivo';
+
+        celdaEstado.appendChild(etiqueta);
+        fila.appendChild(celdaEstado);
+        filas.appendChild(fila);
+      }
+
+      estado?.classList.add('hidden');
+      tabla.classList.remove('hidden');
+
+    } catch (error) {
+      mostrarEstado(
+        error instanceof Error ? error.message : 'Error inesperado.',
+        'error'
+      );
+    } finally {
+      if (actualizar) actualizar.disabled = false;
+    }
+  }
+
+  // Abrir y cerrar formulario.
+  abrir?.addEventListener('click', () => {
+    ocultarCredenciales();
+    panel?.classList.remove('hidden');
+    document.querySelector<HTMLInputElement>('#nombre')?.focus();
+  });
+
+  cerrar?.addEventListener('click', cerrarFormulario);
+  cancelar?.addEventListener('click', cerrarFormulario);
+
+  // Registrar voluntario en MySQL.
+  formulario?.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    if (!formulario.reportValidity()) return;
+    if (guardar?.disabled) return;
+
+    const datosFormulario = new FormData(formulario);
+
+    const datos = {
+      nombre: String(datosFormulario.get('nombre') ?? '').trim(),
+      apellido: String(datosFormulario.get('apellido') ?? '').trim(),
+      correo: String(datosFormulario.get('correo') ?? '').trim(),
+      telefono: String(datosFormulario.get('telefono') ?? '').trim()
+    };
+
+    if (guardar) {
+      guardar.disabled = true;
+      guardar.textContent = 'Guardando...';
+    }
+
+    mostrarMensaje('Registrando voluntario...');
+
+    try {
+      const respuesta = await fetch(`${API}/api/personal`, {
+        method: 'POST',
+        credentials: 'include',
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
+      });
+
+      const resultadoApi = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(
+          resultadoApi.mensaje || 'No se pudo registrar el voluntario.'
+        );
+      }
+
+      if (
+        resultadoApi.estado !== 'ok' ||
+        typeof resultadoApi.passwordTemporal !== 'string'
+      ) {
+        throw new Error('El servidor devolvió una respuesta inesperada.');
+      }
+
+      passwordTemporal = resultadoApi.passwordTemporal;
+
+      if (correoGenerado) {
+        correoGenerado.textContent = resultadoApi.usuario.correo;
+      }
+
+      if (passwordGenerado) {
+        passwordGenerado.textContent = passwordTemporal;
+      }
+
+      cerrarFormulario();
+      resultado?.classList.remove('hidden');
+
+      // Actualizar la tabla con el nuevo voluntario.
+      await cargarPersonal();
+
+    } catch (error) {
+      mostrarMensaje(
+        error instanceof Error ? error.message : 'Error inesperado.',
+        true
+      );
+    } finally {
+      if (guardar) {
+        guardar.disabled = false;
+        guardar.textContent = 'Guardar voluntario';
+      }
+    }
+  });
+
+  copiar?.addEventListener('click', async () => {
+    if (!passwordTemporal) return;
+
+    try {
+      await navigator.clipboard.writeText(passwordTemporal);
+      if (copiar) copiar.textContent = 'Copiada';
+    } catch {
+      if (copiar) copiar.textContent = 'No se pudo copiar';
+    }
+  });
+
+  ocultar?.addEventListener('click', ocultarCredenciales);
+
+  // No conservar contraseñas temporales al salir de la página.
+  window.addEventListener('pagehide', ocultarCredenciales);
+
+  // El AppShell emite este evento después de autorizar al coordinador.
+  document.addEventListener('volunturno:autorizado', () => {
+    autorizado = true;
+    cargarPersonal();
+  });
+
+  actualizar?.addEventListener('click', () => {
+    if (autorizado) cargarPersonal();
+  });
+</script>
